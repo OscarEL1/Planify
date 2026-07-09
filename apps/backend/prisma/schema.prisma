@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 2 roles con permisos distintos basados en el documento
+enum Role {
+  MIEMBRO_EQUIPO
+  OBSERVADOR
+}
+
+// Estatus exactos solicitados
+enum TaskStatus {
+  PENDIENTE
+  EN_PROCESO
+  EN_REVISION
+  COMPLETADA
+}
+
+// Prioridades solicitadas
+enum Priority {
+  ALTA
+  MEDIA
+  BAJA
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(MIEMBRO_EQUIPO)
+  
+  // Relaciones
+  assignedTasks Task[]    @relation("AssignedTasks")
+  comments      Comment[] 
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus @default(PENDIENTE)
+  priority    Priority   @default(MEDIA)
+  dueDate     DateTime?  // Fecha límite de entrega
+  evidenceUrl String?    // Evidencia de entrega (enlace)
+  
+  // Relación con el usuario responsable
+  assigneeId  String?
+  assignee    User?      @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  
+  // Relación con los comentarios
+  comments    Comment[]
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// Modelo para los comentarios y notas de seguimiento
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  
+  // Relaciones
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  createdAt DateTime @default(now())
+}
