@@ -1,0 +1,14 @@
+{
+  "name": "planify",
+  "version": "1.0.0",
+  "description": "Sistema web de gestión de actividades académicas",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=apps/frontend",
+    "dev:backend": "npm run dev --workspace=apps/backend"
+  }
+}
