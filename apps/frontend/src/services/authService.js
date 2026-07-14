@@ -13,6 +13,12 @@ export async function login({ email, password }) {
   return { user, token };
 }
 
+export async function register({ fullName, email, password }) {
+  // 🔧 AJUSTAR AQUÍ según la respuesta real del backend
+  const response = await api.post('/auth/register', { fullName, email, password });
+  return response.data;
+}
+
 export function logout() {
   localStorage.removeItem('planify_token');
 }
