@@ -78,3 +78,38 @@ SHA-256 del token hasta su fecha de expiración. Por ello, la blacklist aplica a
 una sola instancia y se pierde cuando el servidor se reinicia. Para múltiples
 instancias o revocación persistente debe reemplazarse por un almacén compartido
 como Redis o PostgreSQL.
+
+## POST /auth/register
+
+Crea un usuario con el rol `MIEMBRO_EQUIPO`. El rol no se acepta desde el
+cliente y la contraseña se almacena únicamente como hash bcrypt.
+
+```bash
+curl -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"fullName":"Grace Hopper","email":"grace@planify.test","password":"secure-password"}'
+```
+
+Respuesta exitosa (`201`):
+
+```json
+{
+  "message": "Usuario registrado correctamente",
+  "user": {
+    "id": "<uuid>",
+    "name": "Grace Hopper",
+    "email": "grace@planify.test",
+    "role": "MIEMBRO_EQUIPO"
+  }
+}
+```
+
+El correo duplicado retorna `409`:
+
+```json
+{ "message": "El correo ya está registrado" }
+```
+
+Campos ausentes, correo inválido o contraseña menor a ocho caracteres retornan
+`400` con un mensaje que describe el error. La respuesta nunca incluye la
+contraseña ni su hash.
