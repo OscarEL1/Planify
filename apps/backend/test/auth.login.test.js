@@ -63,6 +63,7 @@ describe('POST /auth/login', () => {
     const payload = jwt.verify(body.token, JWT_SECRET);
     assert.equal(payload.sub, storedUser.id);
     assert.equal(payload.email, storedUser.email);
+    assert.equal(typeof payload.jti, 'string');
     assert.equal(payload.exp - payload.iat, 24 * 60 * 60);
   });
 

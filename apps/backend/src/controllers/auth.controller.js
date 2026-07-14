@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma.js';
@@ -38,7 +39,7 @@ export function createLoginController({
       const token = tokenSigner(
         { sub: user.id, email: user.email, role: user.role },
         jwtSecret,
-        { expiresIn: '24h' },
+        { expiresIn: '24h', jwtid: randomUUID() },
       );
 
       return res.status(200).json({
