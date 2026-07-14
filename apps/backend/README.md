@@ -49,3 +49,32 @@ Correo o contraseña ausentes (`400`):
 ```json
 { "message": "El correo y la contraseña son obligatorios" }
 ```
+
+## POST /auth/logout
+
+Invalida inmediatamente el JWT de la sesión activa. El token debe enviarse en
+el encabezado `Authorization` con el esquema Bearer:
+
+```bash
+curl -X POST http://localhost:3000/auth/logout \
+  -H "Authorization: Bearer <jwt>"
+```
+
+Respuesta exitosa (`200`):
+
+```json
+{ "message": "Sesión cerrada correctamente" }
+```
+
+Si el token falta, es inválido, expiró o ya fue revocado, el endpoint responde
+`401`. Por ejemplo, repetir la petición anterior con el mismo token retorna:
+
+```json
+{ "message": "Token inválido o expirado" }
+```
+
+La revocación usa una blacklist en memoria que conserva únicamente el hash
+SHA-256 del token hasta su fecha de expiración. Por ello, la blacklist aplica a
+una sola instancia y se pierde cuando el servidor se reinicia. Para múltiples
+instancias o revocación persistente debe reemplazarse por un almacén compartido
+como Redis o PostgreSQL.
