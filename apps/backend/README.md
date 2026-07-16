@@ -113,3 +113,27 @@ El correo duplicado retorna `409`:
 Campos ausentes, correo inválido o contraseña menor a ocho caracteres retornan
 `400` con un mensaje que describe el error. La respuesta nunca incluye la
 contraseña ni su hash.
+
+## GET /auth/me
+
+Retorna los datos incluidos en el JWT de la sesión autenticada. Requiere el
+encabezado `Authorization` con esquema Bearer:
+
+```bash
+curl http://localhost:3000/auth/me \
+  -H "Authorization: Bearer <jwt>"
+```
+
+Respuesta exitosa (`200`):
+
+```json
+{
+  "id": "<uuid>",
+  "name": "Grace Hopper",
+  "email": "grace@planify.test",
+  "role": "MIEMBRO_EQUIPO"
+}
+```
+
+Si el token falta, es inválido, expiró o fue revocado, responde `401`. La
+respuesta nunca incluye la contraseña.

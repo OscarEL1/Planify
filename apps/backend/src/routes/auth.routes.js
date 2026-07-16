@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createLoginController } from '../controllers/auth.controller.js';
+import { createGetMeController, createLoginController } from '../controllers/auth.controller.js';
 import { createLogoutController } from '../controllers/logout.controller.js';
 import { createRegisterController } from '../controllers/register.controller.js';
 import { createAuthenticateToken } from '../middleware/authenticate-token.js';
@@ -17,6 +17,7 @@ export function createAuthRouter(dependencies = {}) {
   router.post('/login', createLoginController(dependencies));
   router.post('/register', createRegisterController(dependencies));
   router.post('/logout', authenticateToken, createLogoutController({ blacklist }));
+  router.get('/me', authenticateToken, createGetMeController());
 
   return router;
 }
