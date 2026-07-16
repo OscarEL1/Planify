@@ -36,7 +36,6 @@ export default function RegisterForm() {
     setServerError('');
     setIsSubmitting(true);
     try {
-      // 🔧 AJUSTAR payload cuando el backend confirme el contrato de POST /auth/register
       await registerUser({
         fullName: data.fullName,
         email: data.email,

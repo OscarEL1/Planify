@@ -50,7 +50,23 @@
       "Bash(npx --yes playwright install --with-deps chromium)",
       "Bash(npx playwright *)",
       "Bash(node smoke.js)",
-      "Bash(kill 114992 114993)"
+      "Bash(kill 114992 114993)",
+      "Bash(curl -s http://localhost:3001/health)",
+      "Bash(curl -s -o /dev/null -w \"GET  /health      -> %{http_code}\\\\n\" http://localhost:3001/health)",
+      "Bash(curl -s -o /dev/null -w \"POST /auth/login  -> %{http_code}\\\\n\" -X POST http://localhost:3001/auth/login -H \"Content-Type: application/json\" -d '{}')",
+      "Bash(curl -s -o /dev/null -w \"POST /auth/register -> %{http_code}\\\\n\" -X POST http://localhost:3001/auth/register -H \"Content-Type: application/json\" -d '{}')",
+      "Bash(curl -s -o /dev/null -w \"GET  /auth/me     -> %{http_code}\\\\n\" http://localhost:3001/auth/me)",
+      "Bash(curl -s -o /dev/null -w \"POST /auth/logout -> %{http_code}\\\\n\" -X POST http://localhost:3001/auth/logout)",
+      "Bash(node -e \"console.log\\('FRONTEND_URL=', process.env.FRONTEND_URL\\)\")",
+      "Bash(cp /tmp/envcheck2.test.js /home/oscarlan/Documentos/Universidad/EAR/Planify/apps/backend/test/zz-envcheck.test.js)",
+      "Bash(node --test test/zz-envcheck.test.js)",
+      "Bash(env)",
+      "Bash(node --help)",
+      "Bash(curl -s -X POST http://localhost:3001/auth/register -H 'Content-Type: application/json' -d '{\"fullName\":\"QA Planify\",\"email\":\"qa@planify.com\",\"password\":\"Planify2026!\"}')",
+      "Bash(curl -s -X POST http://localhost:3001/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"qa@planify.com\",\"password\":\"Planify2026!\"}')",
+      "Bash(curl -s -o /dev/null -w \"backend :3001 -> %{http_code}\\\\n\" http://localhost:3001/health)",
+      "Bash(curl -s -o /dev/null -w \"frontend :5174 -> %{http_code}\\\\n\" http://localhost:5174)",
+      "Bash(node smoke2.js)"
     ]
   }
 }

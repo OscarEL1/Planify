@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { createGetMeController, createLoginController } from '../controllers/auth.controller.js';
 import { createLogoutController } from '../controllers/logout.controller.js';
 import { createRegisterController } from '../controllers/register.controller.js';
+import { createGetMeController } from '../controllers/me.controller.js';
 import { createAuthenticateToken } from '../middleware/authenticate-token.js';
 import { tokenBlacklist } from '../services/token-blacklist.js';
 

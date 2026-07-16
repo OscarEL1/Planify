@@ -1,15 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import LoginPage from './pages/LoginPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
-
-function DashboardTemporal() {
-  return (
-    <main style={{ padding: '40px' }}>
-      <h1>Dashboard de Planify</h1>
-      <p>El inicio de sesión fue exitoso.</p>
-    </main>
-  )
-}
+import DashboardPage from './pages/DashboardPage.jsx'
+import ProtectedRoute from './components/auth/ProtectedRoute.jsx'
 
 function App() {
   return (
@@ -17,7 +10,9 @@ function App() {
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/dashboard" element={<DashboardTemporal />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
