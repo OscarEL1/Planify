@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
-  X, Paperclip, MessageSquare, Link2, Calendar, Loader2, Send, Trash2, CircleUserRound, CheckSquare, Plus,
+  X, Paperclip, MessageSquare, Link2, Calendar, Loader2, Send, Trash2, CircleUserRound, CheckSquare, Plus, ChevronDown, Check,
 } from 'lucide-react';
 import {
   useUsersQuery,
@@ -26,12 +26,43 @@ const statusOptions = [
   { value: 'COMPLETADA', label: 'Completada', dot: '#22C55E' },
 ];
 
+const avatarColors = ['#4F46E5', '#0891B2', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777'];
+
+function getInitials(name) {
+  if (!name) return '?';
+  return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function getAvatarColor(name) {
+  if (!name) return avatarColors[0];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return avatarColors[Math.abs(hash) % avatarColors.length];
+}
+
+function UserAvatar({ name, size = 24 }) {
+  return (
+    <div
+      className="rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+      style={{ width: size, height: size, fontSize: size * 0.4, backgroundColor: getAvatarColor(name) }}
+    >
+      {getInitials(name)}
+    </div>
+  );
+}
+
 const activitySchema = z.object({
   title: z.string().trim().min(1, 'El título es obligatorio'),
   description: z.string().optional(),
   assigneeId: z.string().optional(),
   priority: z.enum(['ALTA', 'MEDIA', 'BAJA']),
-  dueDate: z.string().min(1, 'La fecha límite es obligatoria'), // 🔧 confirmar si el backend la exige
+  dueDate: z.string().min(1, 'La fecha límite es obligatoria').refine((val) => {
+    const [year, month, day] = val.split('-').map(Number);
+    const today = new Date();
+    const dateOnly = new Date(year, month - 1, day);
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    return dateOnly >= todayOnly;
+  }, 'La fecha límite no puede ser en el pasado'),
   status: z.enum(['PENDIENTE', 'EN_PROCESO', 'EN_REVISION', 'COMPLETADA']),
   evidenceUrl: z
     .string()
@@ -58,6 +89,18 @@ export default function ActivityFormModal({
   const [comments, setComments] = useState([]);
   const [commentDraft, setCommentDraft] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
+  const assigneeDropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (assigneeDropdownRef.current && !assigneeDropdownRef.current.contains(e.target)) {
+        setAssigneeDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const {
     register,
@@ -270,26 +313,58 @@ export default function ActivityFormModal({
           {/* Responsable + Fecha límite */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="assigneeId" className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
+              <label className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
                 Responsable
               </label>
               {usersError ? (
                 <p className="text-xs text-[#EF4444]">No se pudo cargar la lista de responsables.</p>
               ) : (
-                <select
-                  id="assigneeId"
-                  disabled={usersLoading}
-                  className="w-full bg-[#F8F9FB] border border-[#E4E7EC] rounded-lg px-3.5 py-2.5 text-sm text-[#1D2433] outline-none transition focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-60"
-                  {...register('assigneeId')}
-                >
-                  <option value="">{usersLoading ? 'Cargando...' : 'Sin asignar'}</option>
-                  {users?.length === 0 && !usersLoading && (
-                    <option value="" disabled>No hay integrantes disponibles</option>
+                <div className="relative" ref={assigneeDropdownRef}>
+                  <button
+                    type="button"
+                    disabled={usersLoading}
+                    onClick={() => setAssigneeDropdownOpen(!assigneeDropdownOpen)}
+                    className="w-full flex items-center gap-2 bg-[#F8F9FB] border border-[#E4E7EC] rounded-lg px-3.5 py-2.5 text-sm text-[#1D2433] outline-none transition focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-60 text-left"
+                  >
+                    {watch('assigneeId') ? (
+                      <>
+                        <UserAvatar name={users?.find((u) => u.id === watch('assigneeId'))?.name} size={22} />
+                        <span className="truncate">{users?.find((u) => u.id === watch('assigneeId'))?.name}</span>
+                      </>
+                    ) : (
+                      <span className="text-[#A0AEC0]">{usersLoading ? 'Cargando...' : 'Sin asignar'}</span>
+                    )}
+                    <ChevronDown size={14} className="ml-auto text-[#A0AEC0] flex-shrink-0" />
+                  </button>
+                  {assigneeDropdownOpen && (
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-[#E4E7EC] rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      <button
+                        type="button"
+                        onClick={() => { setValue('assigneeId', ''); setAssigneeDropdownOpen(false); }}
+                        className={`w-full flex items-center gap-2 px-3.5 py-2.5 text-sm text-left hover:bg-[#F8F9FB] transition ${!watch('assigneeId') ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
+                      >
+                        <div className="w-[22px] h-[22px] rounded-full bg-[#E4E7EC] flex items-center justify-center text-[#64748B] text-[10px] font-bold">?</div>
+                        <span>Sin asignar</span>
+                        {!watch('assigneeId') && <Check size={14} className="ml-auto text-[#4F46E5]" />}
+                      </button>
+                      {users?.length === 0 && !usersLoading && (
+                        <div className="px-3.5 py-2.5 text-sm text-[#A0AEC0]">No hay integrantes disponibles</div>
+                      )}
+                      {users?.map((u) => (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => { setValue('assigneeId', u.id); setAssigneeDropdownOpen(false); }}
+                          className={`w-full flex items-center gap-2 px-3.5 py-2.5 text-sm text-left hover:bg-[#F8F9FB] transition ${watch('assigneeId') === u.id ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
+                        >
+                          <UserAvatar name={u.name} size={22} />
+                          <span className="truncate">{u.name}</span>
+                          {watch('assigneeId') === u.id && <Check size={14} className="ml-auto text-[#4F46E5]" />}
+                        </button>
+                      ))}
+                    </div>
                   )}
-                  {users?.map((u) => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
-                  ))}
-                </select>
+                </div>
               )}
             </div>
 
@@ -302,6 +377,7 @@ export default function ActivityFormModal({
                 <input
                   id="dueDate"
                   type="date"
+                  min={new Date().toISOString().split('T')[0]}
                   aria-invalid={!!errors.dueDate}
                   className={`w-full bg-[#F8F9FB] border rounded-lg pl-10 pr-3 py-2.5 text-sm text-[#1D2433] outline-none transition focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent ${
                     errors.dueDate ? 'border-[#EF4444]' : 'border-[#E4E7EC]'

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Calendar, Link2 } from 'lucide-react';
+import { Plus, Calendar, Link2, CircleUserRound, AlertTriangle } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { useActivitiesQuery } from '../hooks/useActivities';
 import ActivityFormModal from '../components/activities/ActivityFormModal';
@@ -23,6 +23,13 @@ const priorityStyles = {
   MEDIA: 'bg-[#FFFBEB] text-[#F59E0B]',
   BAJA: 'bg-[#F0FDF4] text-[#22C55E]',
 };
+
+function isOverdue(dueDate, status) {
+  if (!dueDate || status === 'COMPLETADA') return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return new Date(dueDate) < today;
+}
 
 export default function ActivitiesPage() {
   const { data: activities, isLoading, isError } = useActivitiesQuery();
@@ -94,10 +101,21 @@ export default function ActivitiesPage() {
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-[#1D2433] truncate">{activity.title}</p>
                   <div className="flex items-center gap-3 mt-1 text-xs text-[#64748B]">
-                    {activity.dueDate && (
+                    {activity.assignee && (
                       <span className="flex items-center gap-1">
-                        <Calendar size={12} />
-                        {new Date(activity.dueDate).toLocaleDateString('es-MX')}
+                        <CircleUserRound size={12} />
+                        {activity.assignee.name}
+                      </span>
+                    )}
+                    {activity.dueDate && (
+                      <span className={`flex items-center gap-1 ${isOverdue(activity.dueDate, activity.status) ? 'text-[#EF4444] font-medium' : ''}`}>
+                        {isOverdue(activity.dueDate, activity.status) ? (
+                          <AlertTriangle size={12} />
+                        ) : (
+                          <Calendar size={12} />
+                        )}
+                        {new Date(activity.dueDate).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        {isOverdue(activity.dueDate, activity.status) && ' (Vencida)'}
                       </span>
                     )}
                     {activity.evidenceUrl && (
