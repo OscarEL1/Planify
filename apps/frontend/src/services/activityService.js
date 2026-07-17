@@ -7,6 +7,11 @@ export async function getActivities() {
   return response.data;
 }
 
+export async function getActivityById(id) {
+  const response = await api.get(`${RESOURCE}/${id}`);
+  return response.data;
+}
+
 export async function createActivity(payload) {
   const response = await api.post(RESOURCE, normalizePayload(payload));
   return response.data.activity;

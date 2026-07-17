@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Plus, Calendar, Link2, CircleUserRound, AlertTriangle, MessageSquare, CheckSquare } from 'lucide-react';
+import { Plus, Calendar, Link2, AlertTriangle, MessageSquare, CheckSquare } from 'lucide-react';
 import { useActivitiesQuery, useUpdateActivityMutation } from '../../hooks/useActivities';
 import { useToast } from '../common/ToastProvider';
-import ActivityFormModal from '../activities/ActivityFormModal';
 
 const columns = [
   { id: 'PENDIENTE', title: 'Pendiente', color: '#94A3B8', bgColor: '#F1F5F9' },
@@ -122,12 +121,11 @@ function KanbanCard({ activity, onClick }) {
 }
 
 export default function KanbanBoard({ activities: filteredActivities }) {
+  const navigate = useNavigate();
   const { data: allActivities, isLoading, isError } = useActivitiesQuery();
   const activities = filteredActivities || allActivities;
   const updateMutation = useUpdateActivityMutation();
   const { showToast } = useToast();
-  const [selectedActivity, setSelectedActivity] = useState(null);
-  const [modalMode, setModalMode] = useState(null);
 
   const handleDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
@@ -146,12 +144,9 @@ export default function KanbanBoard({ activities: filteredActivities }) {
     }
   };
 
-  const openEdit = (activity) => {
-    setSelectedActivity(activity);
-    setModalMode('edit');
+  const goToDetail = (activity) => {
+    navigate(`/activities/${activity.id}`);
   };
-
-  const closeModal = () => setModalMode(null);
 
   const getColumnActivities = (status) =>
     activities?.filter((a) => a.status === status) || [];
@@ -210,7 +205,7 @@ export default function KanbanBoard({ activities: filteredActivities }) {
                                   opacity: snapshot.isDragging ? 0.8 : 1,
                                 }}
                               >
-                                <KanbanCard activity={activity} onClick={openEdit} />
+                                <KanbanCard activity={activity} onClick={goToDetail} />
                               </div>
                             )}
                           </Draggable>
@@ -226,13 +221,6 @@ export default function KanbanBoard({ activities: filteredActivities }) {
         </div>
       </DragDropContext>
 
-      <ActivityFormModal
-        mode={modalMode || 'create'}
-        initialData={selectedActivity}
-        isOpen={!!modalMode}
-        onClose={closeModal}
-        onSuccess={closeModal}
-      />
     </>
   );
 }

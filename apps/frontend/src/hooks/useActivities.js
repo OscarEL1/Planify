@@ -1,11 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getActivities, createActivity, updateActivity, deleteActivity, getUsers, addComment } from '../services/activityService';
+import { getActivities, getActivityById, createActivity, updateActivity, deleteActivity, getUsers, addComment } from '../services/activityService';
 
 export const ACTIVITIES_KEY = ['activities'];
 export const USERS_KEY = ['users'];
 
 export function useActivitiesQuery() {
   return useQuery({ queryKey: ACTIVITIES_KEY, queryFn: getActivities });
+}
+
+export function useActivityByIdQuery(id) {
+  return useQuery({ queryKey: ['activity', id], queryFn: () => getActivityById(id), enabled: !!id });
 }
 
 export function useUsersQuery() {

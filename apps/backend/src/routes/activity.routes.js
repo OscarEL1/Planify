@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   createActivityController,
   getActivitiesController,
+  getActivityByIdController,
   updateActivityController,
 } from '../controllers/activity.controller.js';
 import { createCommentController } from '../controllers/comment.controller.js';
@@ -17,6 +18,7 @@ export function createActivityRouter(dependencies = {}) {
   });
 
   router.get('/', authenticateToken, getActivitiesController(dependencies));
+  router.get('/:id', authenticateToken, getActivityByIdController(dependencies));
   router.post('/', authenticateToken, createActivityController(dependencies));
   router.patch('/:id', authenticateToken, updateActivityController(dependencies));
   router.post('/:id/comments', authenticateToken, createCommentController(dependencies));

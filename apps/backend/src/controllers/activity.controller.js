@@ -40,6 +40,34 @@ export function getActivitiesController({
   };
 }
 
+export function getActivityByIdController({
+  taskRepository = prisma.task,
+} = {}) {
+  return async function getActivityById(req, res) {
+    try {
+      const activity = await taskRepository.findUnique({
+        where: { id: req.params.id },
+        include: {
+          ...ACTIVITY_INCLUDE,
+          comments: {
+            select: { id: true, text: true, userId: true, createdAt: true, user: { select: { id: true, name: true } } },
+            orderBy: { createdAt: 'asc' },
+          },
+        },
+      });
+
+      if (!activity) {
+        return res.status(404).json({ message: 'Actividad no encontrada' });
+      }
+
+      return res.status(200).json(activity);
+    } catch (error) {
+      console.error('Error al obtener actividad:', error);
+      return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  };
+}
+
 export function createActivityController({
   taskRepository = prisma.task,
   userRepository = prisma.user,
