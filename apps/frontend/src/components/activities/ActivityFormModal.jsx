@@ -9,7 +9,6 @@ import {
   useUsersQuery,
   useCreateActivityMutation,
   useUpdateActivityMutation,
-  useDeleteActivityMutation,
 } from '../../hooks/useActivities';
 import { useToast } from '../common/ToastProvider';
 
@@ -29,7 +28,7 @@ const statusOptions = [
 const activitySchema = z.object({
   title: z.string().trim().min(1, 'El título es obligatorio'),
   description: z.string().optional(),
-  assigneeId: z.string().optional(),
+  assigneeId: z.string().min(1, 'Selecciona un responsable'),
   priority: z.enum(['ALTA', 'MEDIA', 'BAJA']),
   dueDate: z.string().min(1, 'La fecha límite es obligatoria'), // 🔧 confirmar si el backend la exige
   status: z.enum(['PENDIENTE', 'EN_PROCESO', 'EN_REVISION', 'COMPLETADA']),
@@ -51,13 +50,13 @@ export default function ActivityFormModal({
   const { data: users, isLoading: usersLoading, isError: usersError } = useUsersQuery();
   const createMutation = useCreateActivityMutation();
   const updateMutation = useUpdateActivityMutation();
-  const deleteMutation = useDeleteActivityMutation();
+  
 
   const [subtasks, setSubtasks] = useState([]); // 🔧 campo no confirmado en backend
   const [newSubtask, setNewSubtask] = useState('');
   const [comments, setComments] = useState([]);
   const [commentDraft, setCommentDraft] = useState('');
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  
 
   const {
     register,
@@ -76,7 +75,7 @@ export default function ActivityFormModal({
 
   useEffect(() => {
     if (!isOpen) return;
-    setConfirmingDelete(false);
+    
 
     if (mode === 'edit' && initialData) {
       reset({
@@ -131,36 +130,51 @@ export default function ActivityFormModal({
   };
 
   const onSubmit = async (formData) => {
-    const payload = { ...formData, subtasks };
     try {
       if (mode === 'edit') {
+        const payload = {
+          title: formData.title,
+          description: formData.description,
+          assigneeId: formData.assigneeId,
+          priority: formData.priority,
+          dueDate: formData.dueDate,
+          status: formData.status,
+          evidenceUrl: formData.evidenceUrl,
+        };
+
         await updateMutation.mutateAsync({ id: initialData.id, payload });
         showToast('Actividad actualizada correctamente.', 'success');
       } else {
+        const payload = {
+          title: formData.title,
+          description: formData.description,
+          assigneeId: formData.assigneeId,
+          priority: formData.priority,
+          dueDate: formData.dueDate,
+          evidenceUrl: formData.evidenceUrl,
+        };
+
         await createMutation.mutateAsync(payload);
         showToast('Actividad creada correctamente.', 'success');
       }
+
       onSuccess?.();
       onClose();
-    } catch {
-      showToast('No fue posible guardar la actividad.', 'error');
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        'No fue posible guardar la actividad';
+
+      showToast(message, 'error');
+
+      if (mode === 'edit' && error.response?.status === 404) {
+        onSuccess?.();
+        onClose();
+      }
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirmingDelete) {
-      setConfirmingDelete(true);
-      return;
-    }
-    try {
-      await deleteMutation.mutateAsync(initialData.id);
-      showToast('Actividad eliminada correctamente.', 'success');
-      onSuccess?.();
-      onClose();
-    } catch {
-      showToast('No fue posible eliminar la actividad.', 'error');
-    }
-  };
+  
 
   if (!isOpen) return null;
 
@@ -201,7 +215,7 @@ export default function ActivityFormModal({
         {/* Body scrollable */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
           {/* Título — solo visible/editable en modo creación; en edición el título va en el header */}
-          {mode === 'create' && (
+          {true && (
             <div className="flex flex-col gap-1.5">
               <label htmlFor="title" className="text-sm font-medium text-[#1D2433]">
                 Título <span className="text-[#EF4444]">*</span>
@@ -282,7 +296,13 @@ export default function ActivityFormModal({
                   className="w-full bg-[#F8F9FB] border border-[#E4E7EC] rounded-lg px-3.5 py-2.5 text-sm text-[#1D2433] outline-none transition focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-60"
                   {...register('assigneeId')}
                 >
-                  <option value="">{usersLoading ? 'Cargando...' : 'Sin asignar'}</option>
+                  <option value="" disabled={mode === 'create'}>
+                    {usersLoading
+                      ? 'Cargando...'
+                      : mode === 'create'
+                        ? 'Selecciona un responsable'
+                        : 'Sin asignar'}
+                  </option>
                   {users?.length === 0 && !usersLoading && (
                     <option value="" disabled>No hay integrantes disponibles</option>
                   )}
@@ -290,6 +310,11 @@ export default function ActivityFormModal({
                     <option key={u.id} value={u.id}>{u.name}</option>
                   ))}
                 </select>
+              )}
+              {errors.assigneeId && (
+                <p role="alert" className="text-xs text-[#EF4444]">
+                  {errors.assigneeId.message}
+                </p>
               )}
             </div>
 
@@ -336,18 +361,9 @@ export default function ActivityFormModal({
                   ))}
                 </div>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="status" className="text-sm font-medium text-[#1D2433]">Estado</label>
-                <select
-                  id="status"
-                  className="w-full bg-[#F8F9FB] border border-[#E4E7EC] rounded-lg px-3.5 py-2.5 text-sm text-[#1D2433] outline-none transition focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
-                  {...register('status')}
-                >
-                  {statusOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              </div>
+              <p className="text-xs text-[#A0AEC0]">
+                La actividad se creará con estado Pendiente.
+              </p>
             </div>
           )}
 
@@ -366,7 +382,7 @@ export default function ActivityFormModal({
           </div>
 
           {/* Subtareas — solo edición. 🔧 campo no confirmado en backend */}
-          {mode === 'edit' && (
+          {false && mode === 'edit' && (
             <div className="flex flex-col gap-3 pt-2 border-t border-[#E4E7EC]">
               <div className="flex items-center gap-2">
                 <CheckSquare size={16} className="text-[#1D2433]" />
@@ -449,7 +465,7 @@ export default function ActivityFormModal({
           </div>
 
           {/* Comentarios — solo edición */}
-          {mode === 'edit' && (
+          {false && mode === 'edit' && (
             <div className="flex flex-col gap-3 pt-2 border-t border-[#E4E7EC]">
               <div className="flex items-center gap-2 text-sm font-semibold text-[#1D2433]">
                 <MessageSquare size={16} />
@@ -503,25 +519,14 @@ export default function ActivityFormModal({
 
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-[#E4E7EC] bg-[#F8F9FB] rounded-b-2xl">
-          {mode === 'edit' ? (
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-semibold transition disabled:opacity-60 ${
-                confirmingDelete
-                  ? 'bg-[#EF4444] border-[#EF4444] text-white hover:bg-[#DC2626]'
-                  : 'border-[#FCA5A5] text-[#EF4444] hover:bg-[#FEF2F2]'
-              }`}
-            >
-              <Trash2 size={15} />
-              {deleteMutation.isPending ? 'Eliminando...' : confirmingDelete ? '¿Confirmar?' : 'Eliminar actividad'}
-            </button>
-          ) : (
-            <button type="button" title="Adjuntar archivo (próximamente)" disabled className="text-[#A0AEC0] disabled:opacity-60">
-              <Paperclip size={18} />
-            </button>
-          )}
+          <button
+            type="button"
+            title="Adjuntar archivo (próximamente)"
+            disabled
+            className="text-[#A0AEC0] disabled:opacity-60"
+          >
+            <Paperclip size={18} />
+          </button>
 
           <div className="flex items-center gap-3">
             <button

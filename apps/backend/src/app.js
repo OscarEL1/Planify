@@ -3,23 +3,40 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { createAuthRouter } from './routes/auth.routes.js';
 import { createActivityRouter } from './routes/activity.routes.js';
+import { createUserRouter } from './routes/user.routes.js';
 
 export function createApp(options = {}) {
   const app = express();
 
   app.use(helmet());
-  app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true,
-  }));
+
+  app.use(
+    cors({
+      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+      credentials: true,
+    }),
+  );
+
   app.use(express.json());
 
   app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', project: 'Planify Backend funcionando 🚀' });
+    res.json({
+      status: 'ok',
+      project: 'Planify Backend funcionando 🚀',
+    });
   });
 
   app.use('/auth', createAuthRouter(options.authDependencies));
-  app.use('/activities', createActivityRouter(options.activityDependencies));
+
+  app.use(
+    '/activities',
+    createActivityRouter(options.activityDependencies),
+  );
+
+  app.use(
+    '/users',
+    createUserRouter(options.userDependencies),
+  );
 
   return app;
 }
