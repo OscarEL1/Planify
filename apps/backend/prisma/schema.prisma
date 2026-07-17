@@ -59,9 +59,25 @@ model Task {
   
   // Relación con los comentarios
   comments    Comment[]
+
+  // Relación con las subtareas
+  subtasks    Subtask[]
   
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+}
+
+// Modelo para subtareas
+model Subtask {
+  id        String   @id @default(uuid())
+  text      String
+  done      Boolean  @default(false)
+
+  // Relación con la tarea
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }
 
 // Modelo para los comentarios y notas de seguimiento

@@ -137,3 +137,55 @@ Respuesta exitosa (`200`):
 
 Si el token falta, es inválido, expiró o fue revocado, responde `401`. La
 respuesta nunca incluye la contraseña.
+
+## POST /activities
+
+Crea una actividad asignada a un usuario con rol `MIEMBRO_EQUIPO`. Requiere
+autenticación Bearer y siempre guarda el estado inicial como `PENDIENTE`, aunque
+el cliente envíe otro valor.
+
+```bash
+curl -X POST http://localhost:3000/activities \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Preparar presentación","description":"Preparar diapositivas","assigneeId":"<user-uuid>","priority":"ALTA","dueDate":"2026-07-30T18:00:00.000Z","evidenceUrl":"https://example.com/evidencia"}'
+```
+
+Campos del contrato:
+
+- `title`: obligatorio.
+- `description`: opcional.
+- `assigneeId`: UUID obligatorio de un usuario `MIEMBRO_EQUIPO`.
+- `priority`: `ALTA`, `MEDIA` o `BAJA`.
+- `dueDate`: fecha límite válida en formato ISO 8601.
+- `evidenceUrl`: opcional.
+- `status`: ignorado; siempre se establece como `PENDIENTE`.
+- `comments`: ignorado en creación; la respuesta inicia con una lista vacía.
+
+La respuesta exitosa usa código `201` y contiene `message` y `activity`, con el
+ID generado, responsable, estado y timestamps. Los errores de validación usan
+código `400`; un token ausente, inválido o revocado usa `401`.
+
+## PATCH /activities/:id
+
+Actualiza parcialmente una actividad existente. Requiere autenticación Bearer y
+acepta los mismos nombres usados por el formulario del frontend:
+
+```bash
+curl -X PATCH http://localhost:3000/activities/<activity-uuid> \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Presentación final","status":"EN_PROCESO","priority":"ALTA"}'
+```
+
+Los campos admitidos son `title`, `description`, `assigneeId`, `priority`,
+`dueDate`, `status` y `evidenceUrl`. Todos son opcionales, pero debe enviarse al
+menos uno. `description`, `assigneeId`, `dueDate` y `evidenceUrl` pueden enviarse
+como `null` para limpiarlos. Un `assigneeId` no nulo debe pertenecer a un usuario
+con rol `MIEMBRO_EQUIPO`. `subtasks` no se persiste porque todavía no existe en
+el modelo de datos.
+
+La respuesta `200` es directamente la actividad actualizada, tal como la espera
+el servicio del frontend. Un ID inexistente retorna `404`, datos inválidos
+retornan `400` y un token ausente, inválido o revocado retorna `401`. Prisma
+actualiza automáticamente `updatedAt` mediante el atributo `@updatedAt`.
