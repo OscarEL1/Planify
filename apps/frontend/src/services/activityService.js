@@ -13,7 +13,7 @@ export async function createActivity(payload) {
 }
 
 export async function updateActivity(id, payload) {
-  const response = await api.patch(`${RESOURCE}/${id}`, normalizePayload(payload));
+  const response = await api.patch(`${RESOURCE}/${id}`, payload);
   return response.data;
 }
 

@@ -174,7 +174,16 @@ export default function ActivityFormModal({
   };
 
   const onSubmit = async (formData) => {
-    const payload = { ...formData, subtasks };
+    const payload = {
+      title: formData.title?.trim(),
+      description: formData.description?.trim() || null,
+      status: formData.status,
+      priority: formData.priority,
+      dueDate: formData.dueDate || null,
+      evidenceUrl: formData.evidenceUrl?.trim() || null,
+      assigneeId: formData.assigneeId || null,
+      subtasks,
+    };
     try {
       if (mode === 'edit') {
         await updateMutation.mutateAsync({ id: initialData.id, payload });
