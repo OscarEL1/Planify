@@ -137,3 +137,31 @@ Respuesta exitosa (`200`):
 
 Si el token falta, es inválido, expiró o fue revocado, responde `401`. La
 respuesta nunca incluye la contraseña.
+
+## POST /activities
+
+Crea una actividad asignada a un usuario con rol `MIEMBRO_EQUIPO`. Requiere
+autenticación Bearer y siempre guarda el estado inicial como `PENDIENTE`, aunque
+el cliente envíe otro valor.
+
+```bash
+curl -X POST http://localhost:3000/activities \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Preparar presentación","description":"Preparar diapositivas","assigneeId":"<user-uuid>","priority":"ALTA","dueDate":"2026-07-30T18:00:00.000Z","evidenceUrl":"https://example.com/evidencia"}'
+```
+
+Campos del contrato:
+
+- `title`: obligatorio.
+- `description`: opcional.
+- `assigneeId`: UUID obligatorio de un usuario `MIEMBRO_EQUIPO`.
+- `priority`: `ALTA`, `MEDIA` o `BAJA`.
+- `dueDate`: fecha límite válida en formato ISO 8601.
+- `evidenceUrl`: opcional.
+- `status`: ignorado; siempre se establece como `PENDIENTE`.
+- `comments`: ignorado en creación; la respuesta inicia con una lista vacía.
+
+La respuesta exitosa usa código `201` y contiene `message` y `activity`, con el
+ID generado, responsable, estado y timestamps. Los errores de validación usan
+código `400`; un token ausente, inválido o revocado usa `401`.

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { createAuthRouter } from './routes/auth.routes.js';
+import { createActivityRouter } from './routes/activity.routes.js';
 
 export function createApp(options = {}) {
   const app = express();
@@ -18,6 +19,7 @@ export function createApp(options = {}) {
   });
 
   app.use('/auth', createAuthRouter(options.authDependencies));
+  app.use('/activities', createActivityRouter(options.activityDependencies));
 
   return app;
 }
