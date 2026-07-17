@@ -10,10 +10,34 @@ const ACTIVITY_INCLUDE = {
   comments: {
     select: { id: true, text: true, userId: true, createdAt: true },
   },
+  subtasks: {
+    select: { id: true, text: true, done: true },
+    orderBy: { createdAt: 'asc' },
+  },
 };
 
 function optionalText(value) {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+export function getActivitiesController({
+  taskRepository = prisma.task,
+} = {}) {
+  return async function getActivities(req, res) {
+    try {
+      const activities = await taskRepository.findMany({
+        include: ACTIVITY_INCLUDE,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      return res.status(200).json(activities);
+    } catch (error) {
+      console.error('Error al obtener actividades:', error);
+      return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  };
 }
 
 export function createActivityController({
@@ -72,6 +96,14 @@ export function createActivityController({
           dueDate,
           status: TaskStatus.PENDIENTE,
           evidenceUrl,
+          subtasks: {
+            create: Array.isArray(req.body?.subtasks)
+              ? req.body.subtasks.map((st) => ({
+                  text: typeof st.text === 'string' ? st.text.trim() : '',
+                  done: typeof st.done === 'boolean' ? st.done : false,
+                })).filter((st) => st.text)
+              : [],
+          },
         },
         include: ACTIVITY_INCLUDE,
       });
@@ -191,8 +223,27 @@ export function updateActivityController({
         }
       }
 
-      if (Object.keys(data).length === 0) {
+      if (Object.keys(data).length === 0 && !Array.isArray(body.subtasks)) {
         return res.status(400).json({ message: 'No se enviaron campos para actualizar' });
+      }
+
+      // Si se envían subtareas, borrar las existentes y crear las nuevas
+      if (Array.isArray(body.subtasks)) {
+        const subtaskRepository = prisma.subtask;
+        await subtaskRepository.deleteMany({
+          where: { taskId: req.params.id },
+        });
+        if (body.subtasks.length > 0) {
+          await subtaskRepository.createMany({
+            data: body.subtasks
+              .map((st) => ({
+                text: typeof st.text === 'string' ? st.text.trim() : '',
+                done: typeof st.done === 'boolean' ? st.done : false,
+                taskId: req.params.id,
+              }))
+              .filter((st) => st.text),
+          });
+        }
       }
 
       const activity = await taskRepository.update({

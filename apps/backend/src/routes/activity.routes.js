@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createActivityController,
+  getActivitiesController,
   updateActivityController,
 } from '../controllers/activity.controller.js';
 import { createAuthenticateToken } from '../middleware/authenticate-token.js';
@@ -14,6 +15,7 @@ export function createActivityRouter(dependencies = {}) {
     blacklist: dependencies.tokenBlacklist ?? tokenBlacklist,
   });
 
+  router.get('/', authenticateToken, getActivitiesController(dependencies));
   router.post('/', authenticateToken, createActivityController(dependencies));
   router.patch('/:id', authenticateToken, updateActivityController(dependencies));
 

@@ -9,7 +9,7 @@ export async function getActivities() {
 
 export async function createActivity(payload) {
   const response = await api.post(RESOURCE, normalizePayload(payload));
-  return response.data;
+  return response.data.activity;
 }
 
 export async function updateActivity(id, payload) {
