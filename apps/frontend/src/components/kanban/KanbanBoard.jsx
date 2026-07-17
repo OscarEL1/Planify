@@ -121,8 +121,9 @@ function KanbanCard({ activity, onClick }) {
   );
 }
 
-export default function KanbanBoard() {
-  const { data: activities, isLoading, isError } = useActivitiesQuery();
+export default function KanbanBoard({ activities: filteredActivities }) {
+  const { data: allActivities, isLoading, isError } = useActivitiesQuery();
+  const activities = filteredActivities || allActivities;
   const updateMutation = useUpdateActivityMutation();
   const { showToast } = useToast();
   const [selectedActivity, setSelectedActivity] = useState(null);
