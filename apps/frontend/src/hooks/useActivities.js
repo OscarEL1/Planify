@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getActivities, createActivity, updateActivity, deleteActivity, getUsers } from '../services/activityService';
+import { getActivities, createActivity, updateActivity, deleteActivity, getUsers, addComment } from '../services/activityService';
 
 export const ACTIVITIES_KEY = ['activities'];
 export const USERS_KEY = ['users'];
@@ -41,6 +41,24 @@ export function useDeleteActivityMutation() {
     onSuccess: (deletedId) => {
       queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
         old.filter((activity) => activity.id !== deletedId)
+      );
+    },
+  });
+}
+
+export function useAddCommentMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ activityId, text }) => addComment(activityId, text),
+    onSuccess: (newComment, { activityId }) => {
+      queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
+        old.map((activity) => {
+          if (activity.id !== activityId) return activity;
+          return {
+            ...activity,
+            comments: [...(activity.comments || []), newComment],
+          };
+        })
       );
     },
   });

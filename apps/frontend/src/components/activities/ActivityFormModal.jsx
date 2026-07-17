@@ -6,10 +6,12 @@ import {
   X, Paperclip, MessageSquare, Link2, Calendar, Loader2, Send, Trash2, CircleUserRound, CheckSquare, Plus, ChevronDown, Check,
 } from 'lucide-react';
 import {
+  useActivitiesQuery,
   useUsersQuery,
   useCreateActivityMutation,
   useUpdateActivityMutation,
   useDeleteActivityMutation,
+  useAddCommentMutation,
 } from '../../hooks/useActivities';
 import { useToast } from '../common/ToastProvider';
 
@@ -80,13 +82,17 @@ export default function ActivityFormModal({
 }) {
   const { showToast } = useToast();
   const { data: users, isLoading: usersLoading, isError: usersError } = useUsersQuery();
+  const { data: activities } = useActivitiesQuery();
   const createMutation = useCreateActivityMutation();
   const updateMutation = useUpdateActivityMutation();
   const deleteMutation = useDeleteActivityMutation();
+  const addCommentMutation = useAddCommentMutation();
 
-  const [subtasks, setSubtasks] = useState([]); // 🔧 campo no confirmado en backend
+  const freshActivity = activities?.find((a) => a.id === initialData?.id);
+  const comments = freshActivity?.comments || [];
+
+  const [subtasks, setSubtasks] = useState([]);
   const [newSubtask, setNewSubtask] = useState('');
-  const [comments, setComments] = useState([]);
   const [commentDraft, setCommentDraft] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
@@ -132,14 +138,12 @@ export default function ActivityFormModal({
         evidenceUrl: initialData.evidenceUrl || '',
       });
       setSubtasks(initialData.subtasks || []);
-      setComments(initialData.comments || []);
     } else {
       reset({
         title: '', description: '', assigneeId: '', priority: 'MEDIA',
         dueDate: '', status: 'PENDIENTE', evidenceUrl: '',
       });
       setSubtasks([]);
-      setComments([]);
     }
     setNewSubtask('');
     setCommentDraft('');
@@ -162,15 +166,20 @@ export default function ActivityFormModal({
     setNewSubtask('');
   };
 
-  const handleSendComment = () => {
+  const handleSendComment = async () => {
     if (!commentDraft.trim()) return;
-    // 🔧 Backend aún no expone POST /activities/:id/comments — se
-    // agrega solo en el estado local mientras tanto.
-    setComments((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), authorName: 'Tú', authorInitials: 'YO', timeAgo: 'Ahora', text: commentDraft.trim() },
-    ]);
+    const text = commentDraft.trim();
     setCommentDraft('');
+    
+    try {
+      await addCommentMutation.mutateAsync({
+        activityId: initialData?.id,
+        text,
+      });
+      showToast('Comentario agregado.', 'success');
+    } catch {
+      showToast('No fue posible agregar el comentario.', 'error');
+    }
   };
 
   const onSubmit = async (formData) => {
@@ -547,12 +556,12 @@ export default function ActivityFormModal({
               {comments.map((comment) => (
                 <div key={comment.id} className="flex items-start gap-2.5">
                   <div className="w-7 h-7 rounded-full bg-[#5B50D6] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                    {comment.authorInitials}
+                    {getInitials(comment.user?.name || comment.authorName)}
                   </div>
                   <div className="bg-[#F8F9FB] rounded-lg px-3.5 py-2.5 flex-1">
                     <p className="text-sm">
-                      <span className="font-semibold text-[#1D2433]">{comment.authorName}</span>{' '}
-                      <span className="text-xs text-[#A0AEC0]">{comment.timeAgo}</span>
+                      <span className="font-semibold text-[#1D2433]">{comment.user?.name || comment.authorName}</span>{' '}
+                      <span className="text-xs text-[#A0AEC0]">{comment.timeAgo || 'Ahora'}</span>
                     </p>
                     <p className="text-sm text-[#1D2433] mt-0.5">{comment.text}</p>
                   </div>
