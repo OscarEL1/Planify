@@ -4,6 +4,7 @@ import {
   getActivitiesController,
   getActivityByIdController,
   updateActivityController,
+  updateActivityStatusController,
 } from '../controllers/activity.controller.js';
 import { createCommentController } from '../controllers/comment.controller.js';
 import { createAuthenticateToken } from '../middleware/authenticate-token.js';
@@ -20,6 +21,7 @@ export function createActivityRouter(dependencies = {}) {
   router.get('/', authenticateToken, getActivitiesController(dependencies));
   router.get('/:id', authenticateToken, getActivityByIdController(dependencies));
   router.post('/', authenticateToken, createActivityController(dependencies));
+  router.patch('/:id/status', authenticateToken, updateActivityStatusController(dependencies));
   router.patch('/:id', authenticateToken, updateActivityController(dependencies));
   router.post('/:id/comments', authenticateToken, createCommentController(dependencies));
 

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Plus, Calendar, Link2, AlertTriangle, MessageSquare, CheckSquare } from 'lucide-react';
-import { useActivitiesQuery, useUpdateActivityMutation } from '../../hooks/useActivities';
+import { Calendar, Link2, AlertTriangle, MessageSquare, CheckSquare } from 'lucide-react';
+import { useActivitiesQuery, useUpdateActivityStatusMutation } from '../../hooks/useActivities';
 import { useToast } from '../common/ToastProvider';
 
 const columns = [
@@ -124,7 +124,7 @@ export default function KanbanBoard({ activities: filteredActivities }) {
   const navigate = useNavigate();
   const { data: allActivities, isLoading, isError } = useActivitiesQuery();
   const activities = filteredActivities || allActivities;
-  const updateMutation = useUpdateActivityMutation();
+  const updateStatusMutation = useUpdateActivityStatusMutation();
   const { showToast } = useToast();
 
   const handleDragEnd = async (result) => {
@@ -134,13 +134,16 @@ export default function KanbanBoard({ activities: filteredActivities }) {
     if (destination.droppableId === source.droppableId) return;
 
     try {
-      await updateMutation.mutateAsync({
+      await updateStatusMutation.mutateAsync({
         id: draggableId,
-        payload: { status: destination.droppableId },
+        status: destination.droppableId,
       });
       showToast('Actividad movida correctamente.', 'success');
-    } catch {
-      showToast('No fue posible mover la actividad.', 'error');
+    } catch (error) {
+      showToast(
+        error.response?.data?.message || 'No fue posible mover la actividad.',
+        'error',
+      );
     }
   };
 

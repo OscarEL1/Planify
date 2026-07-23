@@ -20,6 +20,17 @@ function optionalText(value) {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
+function normalizeStatus(value) {
+  return typeof value === 'string'
+    ? value
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[\s-]+/g, '_')
+      .toUpperCase()
+    : '';
+}
+
 export function getActivitiesController({
   taskRepository = prisma.task,
 } = {}) {
@@ -206,9 +217,7 @@ export function updateActivityController({
       }
 
       if (Object.hasOwn(body, 'status')) {
-        const status = typeof body.status === 'string'
-          ? body.status.trim().toUpperCase()
-          : '';
+        const status = normalizeStatus(body.status);
         if (!VALID_STATUSES.has(status)) {
           return res.status(400).json({
             message: 'El estado debe ser PENDIENTE, EN_PROCESO, EN_REVISION o COMPLETADA',
@@ -301,6 +310,66 @@ export function updateActivityController({
       }
 
       console.error('Error al actualizar actividad:', error);
+      return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  };
+}
+
+export function updateActivityStatusController({
+  taskRepository = prisma.task,
+} = {}) {
+  return async function updateActivityStatus(req, res) {
+    const body = req.body;
+
+    if (
+      !body
+      || Array.isArray(body)
+      || Object.keys(body).length !== 1
+      || !Object.hasOwn(body, 'status')
+    ) {
+      return res.status(400).json({
+        message: 'El body debe contener únicamente el campo status',
+      });
+    }
+
+    const status = normalizeStatus(body.status);
+    if (!VALID_STATUSES.has(status)) {
+      return res.status(400).json({
+        message: 'El estado debe ser PENDIENTE, EN_PROCESO, EN_REVISION o COMPLETADA',
+      });
+    }
+
+    try {
+      if (status === TaskStatus.COMPLETADA) {
+        const activity = await taskRepository.findUnique({
+          where: { id: req.params.id },
+          select: { id: true, evidenceUrl: true },
+        });
+
+        if (!activity) {
+          return res.status(404).json({ message: 'Actividad no encontrada' });
+        }
+
+        if (typeof activity.evidenceUrl !== 'string' || !activity.evidenceUrl.trim()) {
+          return res.status(400).json({
+            message: 'No se puede completar una actividad sin evidencia registrada',
+          });
+        }
+      }
+
+      const activity = await taskRepository.update({
+        where: { id: req.params.id },
+        data: { status },
+        include: ACTIVITY_INCLUDE,
+      });
+
+      return res.status(200).json(activity);
+    } catch (error) {
+      if (error?.code === 'P2025') {
+        return res.status(404).json({ message: 'Actividad no encontrada' });
+      }
+
+      console.error('Error al actualizar el estado de la actividad:', error);
       return res.status(500).json({ message: 'Error interno del servidor' });
     }
   };

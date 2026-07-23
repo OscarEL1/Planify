@@ -22,6 +22,11 @@ export async function updateActivity(id, payload) {
   return response.data;
 }
 
+export async function updateActivityStatus(id, status) {
+  const response = await api.patch(`${RESOURCE}/${id}/status`, { status });
+  return response.data;
+}
+
 export async function deleteActivity(id) {
   await api.delete(`${RESOURCE}/${id}`);
   return id;
