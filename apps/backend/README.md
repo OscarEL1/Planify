@@ -189,3 +189,24 @@ La respuesta `200` es directamente la actividad actualizada, tal como la espera
 el servicio del frontend. Un ID inexistente retorna `404`, datos inválidos
 retornan `400` y un token ausente, inválido o revocado retorna `401`. Prisma
 actualiza automáticamente `updatedAt` mediante el atributo `@updatedAt`.
+
+## PATCH /activities/:id/status
+
+Actualiza exclusivamente el estado de una actividad. Requiere autenticación
+Bearer y el body debe contener únicamente el campo `status`:
+
+```bash
+curl -X PATCH http://localhost:3000/activities/<activity-uuid>/status \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"EN_PROCESO"}'
+```
+
+Los estados permitidos son `PENDIENTE`, `EN_PROCESO`, `EN_REVISION` y
+`COMPLETADA`. También se aceptan sus etiquetas en español, sin importar
+mayúsculas o acentos. La regla RN-04 impide cambiar a `COMPLETADA` cuando la
+actividad no tiene `evidenceUrl`.
+
+La respuesta exitosa usa código `200` y retorna directamente la actividad
+actualizada. Un estado inválido, campos adicionales o el incumplimiento de RN-04
+retornan `400`; un ID inexistente retorna `404`.

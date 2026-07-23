@@ -1,5 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getActivities, getActivityById, createActivity, updateActivity, deleteActivity, getUsers, addComment } from '../services/activityService';
+import {
+  getActivities,
+  getActivityById,
+  createActivity,
+  updateActivity,
+  updateActivityStatus,
+  deleteActivity,
+  getUsers,
+  addComment,
+} from '../services/activityService';
 
 export const ACTIVITIES_KEY = ['activities'];
 export const USERS_KEY = ['users'];
@@ -30,6 +39,18 @@ export function useUpdateActivityMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, payload }) => updateActivity(id, payload),
+    onSuccess: (updatedActivity) => {
+      queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
+        old.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity))
+      );
+    },
+  });
+}
+
+export function useUpdateActivityStatusMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }) => updateActivityStatus(id, status),
     onSuccess: (updatedActivity) => {
       queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
         old.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity))
