@@ -20,6 +20,23 @@ function optionalText(value) {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
+function isValidEvidenceUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value.trim());
+    return ['http:', 'https:'].includes(url.protocol) && Boolean(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isTeamMember(req) {
+  return req.auth?.payload?.role === Role.MIEMBRO_EQUIPO;
+}
+
 function normalizeStatus(value) {
   return typeof value === 'string'
     ? value
@@ -106,6 +123,18 @@ export function createActivityController({
     if (!VALID_PRIORITIES.has(priority)) {
       return res.status(400).json({
         message: 'La prioridad debe ser ALTA, MEDIA o BAJA',
+      });
+    }
+
+    if (evidenceUrl && !isTeamMember(req)) {
+      return res.status(403).json({
+        message: 'Solo los miembros del equipo pueden registrar evidencia',
+      });
+    }
+
+    if (evidenceUrl && !isValidEvidenceUrl(evidenceUrl)) {
+      return res.status(400).json({
+        message: 'El enlace de evidencia debe ser una URL HTTP o HTTPS válida',
       });
     }
 
@@ -239,10 +268,23 @@ export function updateActivityController({
       }
 
       if (Object.hasOwn(body, 'evidenceUrl')) {
+        if (!isTeamMember(req)) {
+          return res.status(403).json({
+            message: 'Solo los miembros del equipo pueden modificar la evidencia',
+          });
+        }
+
         if (body.evidenceUrl !== null && typeof body.evidenceUrl !== 'string') {
           return res.status(400).json({ message: 'El enlace de evidencia no es válido' });
         }
-        data.evidenceUrl = optionalText(body.evidenceUrl);
+
+        const evidenceUrl = optionalText(body.evidenceUrl);
+        if (evidenceUrl && !isValidEvidenceUrl(evidenceUrl)) {
+          return res.status(400).json({
+            message: 'El enlace de evidencia debe ser una URL HTTP o HTTPS válida',
+          });
+        }
+        data.evidenceUrl = evidenceUrl;
       }
 
       if (Object.hasOwn(body, 'assigneeId')) {
@@ -370,6 +412,53 @@ export function updateActivityStatusController({
       }
 
       console.error('Error al actualizar el estado de la actividad:', error);
+      return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  };
+}
+
+export function updateActivityEvidenceController({
+  taskRepository = prisma.task,
+} = {}) {
+  return async function updateActivityEvidence(req, res) {
+    if (!isTeamMember(req)) {
+      return res.status(403).json({
+        message: 'Solo los miembros del equipo pueden modificar la evidencia',
+      });
+    }
+
+    const body = req.body;
+    if (
+      !body
+      || Array.isArray(body)
+      || Object.keys(body).length !== 1
+      || !Object.hasOwn(body, 'evidenceUrl')
+    ) {
+      return res.status(400).json({
+        message: 'El body debe contener únicamente el campo evidenceUrl',
+      });
+    }
+
+    if (!isValidEvidenceUrl(body.evidenceUrl)) {
+      return res.status(400).json({
+        message: 'El enlace de evidencia debe ser una URL HTTP o HTTPS válida',
+      });
+    }
+
+    try {
+      const activity = await taskRepository.update({
+        where: { id: req.params.id },
+        data: { evidenceUrl: body.evidenceUrl.trim() },
+        include: ACTIVITY_INCLUDE,
+      });
+
+      return res.status(200).json(activity);
+    } catch (error) {
+      if (error?.code === 'P2025') {
+        return res.status(404).json({ message: 'Actividad no encontrada' });
+      }
+
+      console.error('Error al actualizar la evidencia de la actividad:', error);
       return res.status(500).json({ message: 'Error interno del servidor' });
     }
   };
