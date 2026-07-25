@@ -49,6 +49,11 @@ const token = jwt.sign(
   JWT_SECRET,
   { expiresIn: '24h', jwtid: randomUUID() },
 );
+const observerToken = jwt.sign(
+  { sub: 'observer-1', name: 'Observer', email: 'observer@planify.test', role: 'OBSERVADOR' },
+  JWT_SECRET,
+  { expiresIn: '24h', jwtid: randomUUID() },
+);
 
 before(async () => {
   const app = createApp({
@@ -145,6 +150,20 @@ describe('PATCH /activities/:id', () => {
 
     assert.equal(missing.status, 400);
     assert.equal(invalidRole.status, 400);
+  });
+
+  it('valida evidenceUrl y restringe su modificación a miembros del equipo', async () => {
+    const invalidUrl = await updateActivity('activity-1', {
+      evidenceUrl: 'youtube.com/watch?v=example',
+    });
+    const forbidden = await updateActivity(
+      'activity-1',
+      { evidenceUrl: 'https://youtube.com/watch?v=example' },
+      observerToken,
+    );
+
+    assert.equal(invalidUrl.status, 400);
+    assert.equal(forbidden.status, 403);
   });
 
   it('retorna 400 cuando no se envían campos soportados', async () => {

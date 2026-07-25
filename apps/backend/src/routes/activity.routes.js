@@ -4,6 +4,7 @@ import {
   getActivitiesController,
   getActivityByIdController,
   updateActivityController,
+  updateActivityEvidenceController,
   updateActivityStatusController,
 } from '../controllers/activity.controller.js';
 import { createCommentController } from '../controllers/comment.controller.js';
@@ -22,6 +23,7 @@ export function createActivityRouter(dependencies = {}) {
   router.get('/:id', authenticateToken, getActivityByIdController(dependencies));
   router.post('/', authenticateToken, createActivityController(dependencies));
   router.patch('/:id/status', authenticateToken, updateActivityStatusController(dependencies));
+  router.patch('/:id/evidence', authenticateToken, updateActivityEvidenceController(dependencies));
   router.patch('/:id', authenticateToken, updateActivityController(dependencies));
   router.post('/:id/comments', authenticateToken, createCommentController(dependencies));
 

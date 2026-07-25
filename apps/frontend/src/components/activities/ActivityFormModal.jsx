@@ -53,6 +53,17 @@ function UserAvatar({ name, size = 24 }) {
   );
 }
 
+function isValidEvidenceUrl(value) {
+  if (!value) return true;
+
+  try {
+    const url = new URL(value);
+    return ['http:', 'https:'].includes(url.protocol) && Boolean(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 const activitySchema = z.object({
   title: z.string().trim().min(1, 'El título es obligatorio'),
   description: z.string().optional(),
@@ -68,8 +79,9 @@ const activitySchema = z.object({
   status: z.enum(['PENDIENTE', 'EN_PROCESO', 'EN_REVISION', 'COMPLETADA']),
   evidenceUrl: z
     .string()
+    .trim()
     .optional()
-    .refine((val) => !val || /^https?:\/\/.+/.test(val), 'Ingresa una URL válida (https://...)'),
+    .refine(isValidEvidenceUrl, 'Ingresa una URL HTTP o HTTPS válida'),
 });
 
 export default function ActivityFormModal({
@@ -526,7 +538,7 @@ export default function ActivityFormModal({
               <Link2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A0AEC0] pointer-events-none" />
               <input
                 id="evidenceUrl"
-                type="text"
+                type="url"
                 placeholder="https://..."
                 aria-invalid={!!errors.evidenceUrl}
                 className={`w-full bg-[#F8F9FB] border rounded-lg pl-10 pr-3 py-2.5 text-sm text-[#1D2433] placeholder-[#A0AEC0] outline-none transition focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent ${

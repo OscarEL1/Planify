@@ -210,3 +210,21 @@ actividad no tiene `evidenceUrl`.
 La respuesta exitosa usa código `200` y retorna directamente la actividad
 actualizada. Un estado inválido, campos adicionales o el incumplimiento de RN-04
 retornan `400`; un ID inexistente retorna `404`.
+
+## PATCH /activities/:id/evidence
+
+Actualiza exclusivamente el enlace de evidencia de una actividad. Requiere un
+Bearer token perteneciente a un usuario con rol `MIEMBRO_EQUIPO`, y el body debe
+contener únicamente `evidenceUrl`:
+
+```bash
+curl -X PATCH http://localhost:3000/activities/<activity-uuid>/evidence \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"evidenceUrl":"https://github.com/organizacion/repositorio"}'
+```
+
+El enlace debe ser una URL válida con protocolo HTTP o HTTPS. La respuesta
+exitosa usa código `200` y retorna directamente la actividad actualizada. Una URL
+inválida o campos adicionales retornan `400`; un observador recibe `403` y un ID
+inexistente retorna `404`.
