@@ -10,10 +10,12 @@ import {
   useUsersQuery,
   useCreateActivityMutation,
   useUpdateActivityMutation,
+  useUpdateActivityEvidenceMutation,
   useDeleteActivityMutation,
   useAddCommentMutation,
 } from '../../hooks/useActivities';
 import { useToast } from '../common/ToastProvider';
+import { getUser } from '../../services/authService';
 
 const priorities = [
   { value: 'ALTA', label: 'Alta', dot: '#EF4444' },
@@ -97,8 +99,12 @@ export default function ActivityFormModal({
   const { data: activities } = useActivitiesQuery();
   const createMutation = useCreateActivityMutation();
   const updateMutation = useUpdateActivityMutation();
+  const evidenceMutation = useUpdateActivityEvidenceMutation();
   const deleteMutation = useDeleteActivityMutation();
   const addCommentMutation = useAddCommentMutation();
+
+  // HU evidencia (CA-04): solo MIEMBRO_EQUIPO puede agregar/editar evidencia
+  const isObserver = getUser()?.role === 'OBSERVADOR';
 
   const freshActivity = activities?.find((a) => a.id === initialData?.id);
   const comments = freshActivity?.comments || [];
@@ -161,7 +167,7 @@ export default function ActivityFormModal({
     setCommentDraft('');
   }, [isOpen, mode, initialData, reset]);
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const isSubmitting = createMutation.isPending || updateMutation.isPending || evidenceMutation.isPending;
   const selectedPriority = watch('priority');
   const selectedStatus = watch('status');
 
@@ -201,16 +207,24 @@ export default function ActivityFormModal({
       status: formData.status,
       priority: formData.priority,
       dueDate: formData.dueDate || null,
-      evidenceUrl: formData.evidenceUrl?.trim() || null,
       assigneeId: formData.assigneeId || null,
       subtasks,
     };
     try {
       if (mode === 'edit') {
         await updateMutation.mutateAsync({ id: initialData.id, payload });
+
+        // HU evidencia: se actualiza por su propio endpoint
+        // (PATCH /activities/:id/evidence), no por el PATCH general.
+        const previousEvidenceUrl = initialData.evidenceUrl || '';
+        const newEvidenceUrl = formData.evidenceUrl?.trim() || '';
+        if (!isObserver && newEvidenceUrl !== previousEvidenceUrl) {
+         await evidenceMutation.mutateAsync({ id: initialData.id, evidenceUrl: newEvidenceUrl });
+        }
+
         showToast('Actividad actualizada correctamente.', 'success');
       } else {
-        await createMutation.mutateAsync(payload);
+        await createMutation.mutateAsync({ ...payload, evidenceUrl: formData.evidenceUrl?.trim() || null });
         showToast('Actividad creada correctamente.', 'success');
       }
       onSuccess?.();
@@ -540,8 +554,9 @@ export default function ActivityFormModal({
                 id="evidenceUrl"
                 type="url"
                 placeholder="https://..."
+                disabled={isObserver}
                 aria-invalid={!!errors.evidenceUrl}
-                className={`w-full bg-[#F8F9FB] border rounded-lg pl-10 pr-3 py-2.5 text-sm text-[#1D2433] placeholder-[#A0AEC0] outline-none transition focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent ${
+                className={`w-full bg-[#F8F9FB] border rounded-lg pl-10 pr-3 py-2.5 text-sm text-[#1D2433] placeholder-[#A0AEC0] outline-none transition focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-60 disabled:cursor-not-allowed ${
                   errors.evidenceUrl ? 'border-[#EF4444]' : 'border-[#E4E7EC]'
                 }`}
                 {...register('evidenceUrl')}
@@ -549,6 +564,8 @@ export default function ActivityFormModal({
             </div>
             {errors.evidenceUrl ? (
               <p role="alert" className="text-xs text-[#EF4444]">{errors.evidenceUrl.message}</p>
+            ) : isObserver ? (
+              <p className="text-xs text-[#A0AEC0]">Solo los miembros del equipo pueden agregar o editar la evidencia.</p>
             ) : (
               <p className="text-xs text-[#A0AEC0]">Pega un enlace al trabajo entregado</p>
             )}
@@ -644,7 +661,6 @@ export default function ActivityFormModal({
               disabled={isSubmitting}
               className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar cambios' : 'Guardar actividad'}
             </button>
           </div>

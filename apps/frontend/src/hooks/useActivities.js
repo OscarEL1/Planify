@@ -5,6 +5,7 @@ import {
   createActivity,
   updateActivity,
   updateActivityStatus,
+  updateActivityEvidence,
   deleteActivity,
   getUsers,
   addComment,
@@ -51,6 +52,19 @@ export function useUpdateActivityStatusMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }) => updateActivityStatus(id, status),
+    onSuccess: (updatedActivity) => {
+      queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
+        old.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity))
+      );
+    },
+  });
+}
+
+// HU evidencia: mutation dedicada al endpoint PATCH /activities/:id/evidence
+export function useUpdateActivityEvidenceMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, evidenceUrl }) => updateActivityEvidence(id, evidenceUrl),
     onSuccess: (updatedActivity) => {
       queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
         old.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity))
