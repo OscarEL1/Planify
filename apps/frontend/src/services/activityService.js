@@ -27,6 +27,15 @@ export async function updateActivityStatus(id, status) {
   return response.data;
 }
 
+// HU evidencia: actualiza únicamente el enlace de evidencia,
+// usando su propio endpoint (no el PATCH general de la actividad).
+export async function updateActivityEvidence(id, evidenceUrl) {
+  const response = await api.patch(`${RESOURCE}/${id}/evidence`, {
+    evidenceUrl: evidenceUrl?.trim() || null,
+  });
+  return response.data;
+}
+
 export async function deleteActivity(id) {
   await api.delete(`${RESOURCE}/${id}`);
   return id;
