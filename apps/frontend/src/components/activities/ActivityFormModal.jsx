@@ -11,6 +11,7 @@ import {
   useCreateActivityMutation,
   useUpdateActivityMutation,
   useUpdateActivityEvidenceMutation,
+  useUpdateActivityStatusMutation,
   useDeleteActivityMutation,
   useAddCommentMutation,
 } from '../../hooks/useActivities';
@@ -99,7 +100,10 @@ export default function ActivityFormModal({
   const { data: activities } = useActivitiesQuery();
   const createMutation = useCreateActivityMutation();
   const updateMutation = useUpdateActivityMutation();
+  
   const evidenceMutation = useUpdateActivityEvidenceMutation();
+  const updateStatusMutation = useUpdateActivityStatusMutation();
+  
   const deleteMutation = useDeleteActivityMutation();
   const addCommentMutation = useAddCommentMutation();
 
@@ -167,7 +171,13 @@ export default function ActivityFormModal({
     setCommentDraft('');
   }, [isOpen, mode, initialData, reset]);
 
+
   const isSubmitting = createMutation.isPending || updateMutation.isPending || evidenceMutation.isPending;
+  const isSubmitting =
+  createMutation.isPending ||
+  updateMutation.isPending ||
+  updateStatusMutation.isPending;
+
   const selectedPriority = watch('priority');
   const selectedStatus = watch('status');
 
@@ -201,6 +211,7 @@ export default function ActivityFormModal({
   };
 
   const onSubmit = async (formData) => {
+
     const payload = {
       title: formData.title?.trim(),
       description: formData.description?.trim() || null,
@@ -226,13 +237,53 @@ export default function ActivityFormModal({
       } else {
         await createMutation.mutateAsync({ ...payload, evidenceUrl: formData.evidenceUrl?.trim() || null });
         showToast('Actividad creada correctamente.', 'success');
-      }
-      onSuccess?.();
-      onClose();
-    } catch {
-      showToast('No fue posible guardar la actividad.', 'error');
-    }
+
+  const payload = {
+    title: formData.title?.trim(),
+    description: formData.description?.trim() || null,
+    priority: formData.priority,
+    dueDate: formData.dueDate || null,
+    evidenceUrl: formData.evidenceUrl?.trim() || null,
+    assigneeId: formData.assigneeId || null,
+    subtasks,
   };
+
+  try {
+    if (mode === 'edit') {
+      const statusChanged = formData.status !== initialData.status;
+
+      await updateMutation.mutateAsync({
+        id: initialData.id,
+        payload,
+      });
+
+      if (statusChanged) {
+        await updateStatusMutation.mutateAsync({
+          id: initialData.id,
+          status: formData.status,
+        });
+
+      }
+
+      showToast('Actividad actualizada correctamente.', 'success');
+    } else {
+      await createMutation.mutateAsync({
+        ...payload,
+        status: formData.status,
+      });
+
+      showToast('Actividad creada correctamente.', 'success');
+    }
+
+    onSuccess?.();
+    onClose();
+  } catch (error) {
+    showToast(
+      error.response?.data?.message || 'No fue posible guardar la actividad.',
+      'error',
+    );
+  }
+};
 
   const handleDelete = async () => {
     if (!confirmingDelete) {
