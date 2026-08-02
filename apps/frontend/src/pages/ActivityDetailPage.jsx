@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, MessageSquare, CheckSquare, Plus, Calendar, Link2, Loader2, CircleUserRound } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, MessageSquare, CheckSquare, Plus, Calendar, Link2, Loader2 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { useActivityByIdQuery, useUsersQuery, useUpdateActivityMutation, useDeleteActivityMutation, useAddCommentMutation } from '../hooks/useActivities';
 import { useToast } from '../components/common/ToastProvider';
+import { getUser } from '../services/authService';
 
 const statusStyles = {
   PENDIENTE: { bg: '#F1F5F9', color: '#64748B', label: 'Pendiente', dot: '#94A3B8' },
@@ -37,20 +38,22 @@ function formatDate(dateStr) {
 }
 
 function formatTime(dateStr) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Ahora';
-  if (mins < 60) return `Hace ${mins} min`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `Hace ${hours} hora${hours > 1 ? 's' : ''}`;
-  const days = Math.floor(hours / 24);
-  return `Hace ${days} día${days > 1 ? 's' : ''}`;
+  if (!dateStr) return '';
+
+  return new Date(dateStr).toLocaleString('es-MX', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
 export default function ActivityDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const isObserver = getUser()?.role === 'OBSERVADOR';
   const { data: activity, isLoading, isError } = useActivityByIdQuery(id);
   const { data: users } = useUsersQuery();
   const updateMutation = useUpdateActivityMutation();
@@ -182,73 +185,85 @@ export default function ActivityDetailPage() {
           </div>
         </div>
 
-        <div className="flex gap-6">
-          {/* Main content */}
-          <div className="flex-1">
-            {/* Activity header */}
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-medium px-2 py-0.5 rounded bg-[#EEF2FF] text-[#4F46E5]">Actividad</span>
-                <span className="text-xs text-[#64748B]">·</span>
-                <span className="flex items-center gap-1 text-xs" style={{ color: status.color }}>
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: status.dot }} />
-                  {status.label}
-                </span>
-              </div>
-              <h1 className="text-xl font-bold text-[#1D2433] mb-2">{activity.title}</h1>
-              {activity.description && (
-                <p className="text-sm text-[#64748B]">{activity.description}</p>
-              )}
-            </div>
+                
+
+        {/* Contenido principal */}
+        <div className="flex gap-6 items-start">
+          <div className="flex-1 min-w-0">
 
             {/* Comments */}
             <div className="mt-8">
-              <div className="flex items-center gap-2 mb-4">
-                <MessageSquare size={16} className="text-[#1D2433]" />
-                <h2 className="text-sm font-semibold text-[#1D2433]">Comentarios</h2>
-                <span className="text-xs text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
-                  {activity.comments?.length || 0}
-                </span>
-              </div>
+<div className="mt-8">
+  <div className="flex items-center gap-2 mb-4">
+    <MessageSquare size={16} className="text-[#1D2433]" />
+    <h2 className="text-sm font-semibold text-[#1D2433]">Comentarios</h2>
+    <span className="text-xs text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
+      {activity.comments?.length || 0}
+    </span>
+  </div>
 
-              <div className="flex flex-col gap-4">
-                {activity.comments?.map((comment) => (
-                  <div key={comment.id} className="flex items-start gap-3">
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
-                      style={{ backgroundColor: getAvatarColor(comment.user?.name) }}
-                    >
-                      {getInitials(comment.user?.name)}
-                    </div>
-                    <div className="flex-1 bg-[#F8F9FB] rounded-lg px-4 py-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-semibold text-[#1D2433]">{comment.user?.name}</span>
-                        <span className="text-xs text-[#A0AEC0]">{formatTime(comment.createdAt)}</span>
-                      </div>
-                      <p className="text-sm text-[#1D2433]">{comment.text}</p>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Comment input */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#4F46E5] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                    TÚ
-                  </div>
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      value={commentDraft}
-                      onChange={(e) => setCommentDraft(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSendComment(); } }}
-                      placeholder="Escribe un comentario y presiona Enter..."
-                      className="w-full bg-white border border-[#E4E7EC] rounded-lg px-4 py-3 text-sm text-[#1D2433] placeholder-[#A0AEC0] outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+  <div className="flex flex-col gap-4">
+    {[...(activity.comments || [])]
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .map((comment) => (
+        <div key={comment.id} className="flex items-start gap-3">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+            style={{ backgroundColor: getAvatarColor(comment.user?.name) }}
+          >
+            {getInitials(comment.user?.name)}
           </div>
+
+          <div className="flex-1 bg-[#F8F9FB] rounded-lg px-4 py-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm font-semibold text-[#1D2433]">
+                {comment.user?.name || 'Usuario'}
+              </span>
+
+              <span className="text-xs text-[#A0AEC0]">
+                {formatTime(comment.createdAt)}
+              </span>
+            </div>
+
+            <p className="text-sm text-[#1D2433]">
+              {comment.text}
+            </p>
+          </div>
+        </div>
+      ))}
+
+    {/* Campo para agregar comentarios — oculto para OBSERVADOR */}
+    {!isObserver && (
+      <div className="flex items-start gap-3">
+        <div className="w-8 h-8 rounded-full bg-[#4F46E5] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+          TÚ
+        </div>
+
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            value={commentDraft}
+            onChange={(e) => setCommentDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSendComment();
+              }
+            }}
+            disabled={addCommentMutation.isPending}
+            placeholder={
+              addCommentMutation.isPending
+                ? 'Publicando comentario...'
+                : 'Escribe un comentario y presiona Enter...'
+            }
+            className="w-full bg-white border border-[#E4E7EC] rounded-lg px-4 py-3 text-sm text-[#1D2433] placeholder-[#A0AEC0] outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-60"
+          />
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
 
           {/* Right sidebar */}
           <div className="w-72 flex-shrink-0">
@@ -364,7 +379,10 @@ export default function ActivityDetailPage() {
                 </a>
               </div>
             )}
-          </div>
+                    </div>
+        </div>
+
+        {/* Cierre del contenedor principal: contenido + sidebar */}
         </div>
       </main>
     </div>
