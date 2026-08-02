@@ -8,6 +8,7 @@ import {
   updateActivityEvidenceController,
   updateActivityStatusController,
 } from '../controllers/activity.controller.js';
+import { getActivityStatsController } from '../controllers/activity-stats.controller.js';
 import { createCommentController, getCommentsController } from '../controllers/comment.controller.js';
 import { createAuthenticateToken } from '../middleware/authenticate-token.js';
 import { createRequireTeamMember, requireTeamMember } from '../middleware/require-team-member.js';
@@ -26,6 +27,7 @@ export function createActivityRouter(dependencies = {}) {
   });
 
   router.get('/', authenticateToken, getActivitiesController(dependencies));
+  router.get('/stats', authenticateToken, getActivityStatsController(dependencies));
   router.get('/:id', authenticateToken, getActivityByIdController(dependencies));
   router.post('/', authenticateToken, createActivityController(dependencies));
   router.patch('/:id/status', authenticateToken, updateActivityStatusController(dependencies));
