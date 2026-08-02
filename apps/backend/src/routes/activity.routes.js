@@ -8,10 +8,14 @@ import {
   updateActivityEvidenceController,
   updateActivityStatusController,
 } from '../controllers/activity.controller.js';
-import { createCommentController } from '../controllers/comment.controller.js';
+import { createCommentController, getCommentsController } from '../controllers/comment.controller.js';
 import { createAuthenticateToken } from '../middleware/authenticate-token.js';
-import { requireTeamMember } from '../middleware/require-team-member.js';
+import { createRequireTeamMember, requireTeamMember } from '../middleware/require-team-member.js';
 import { tokenBlacklist } from '../services/token-blacklist.js';
+
+const requireCommentingMember = createRequireTeamMember({
+  forbiddenMessage: 'Solo los miembros del equipo pueden publicar comentarios',
+});
 
 export function createActivityRouter(dependencies = {}) {
   const router = Router();
@@ -28,7 +32,13 @@ export function createActivityRouter(dependencies = {}) {
   router.patch('/:id/evidence', authenticateToken, updateActivityEvidenceController(dependencies));
   router.patch('/:id', authenticateToken, updateActivityController(dependencies));
   router.delete('/:id', authenticateToken, requireTeamMember, deleteActivityController(dependencies));
-  router.post('/:id/comments', authenticateToken, createCommentController(dependencies));
+  router.get('/:id/comments', authenticateToken, getCommentsController(dependencies));
+  router.post(
+    '/:id/comments',
+    authenticateToken,
+    requireCommentingMember,
+    createCommentController(dependencies),
+  );
 
   return router;
 }
