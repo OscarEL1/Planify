@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createActivityController,
+  deleteActivityController,
   getActivitiesController,
   getActivityByIdController,
   updateActivityController,
@@ -9,6 +10,7 @@ import {
 } from '../controllers/activity.controller.js';
 import { createCommentController } from '../controllers/comment.controller.js';
 import { createAuthenticateToken } from '../middleware/authenticate-token.js';
+import { requireTeamMember } from '../middleware/require-team-member.js';
 import { tokenBlacklist } from '../services/token-blacklist.js';
 
 export function createActivityRouter(dependencies = {}) {
@@ -25,6 +27,7 @@ export function createActivityRouter(dependencies = {}) {
   router.patch('/:id/status', authenticateToken, updateActivityStatusController(dependencies));
   router.patch('/:id/evidence', authenticateToken, updateActivityEvidenceController(dependencies));
   router.patch('/:id', authenticateToken, updateActivityController(dependencies));
+  router.delete('/:id', authenticateToken, requireTeamMember, deleteActivityController(dependencies));
   router.post('/:id/comments', authenticateToken, createCommentController(dependencies));
 
   return router;

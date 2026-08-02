@@ -96,6 +96,36 @@ export function getActivityByIdController({
   };
 }
 
+export function deleteActivityController({
+  taskRepository = prisma.task,
+} = {}) {
+  return async function deleteActivity(req, res) {
+    try {
+      const existingActivity = await taskRepository.findUnique({
+        where: { id: req.params.id },
+        select: { id: true },
+      });
+
+      if (!existingActivity) {
+        return res.status(404).json({ message: 'Actividad no encontrada' });
+      }
+
+      await taskRepository.delete({
+        where: { id: req.params.id },
+      });
+
+      return res.status(204).send();
+    } catch (error) {
+      if (error?.code === 'P2025') {
+        return res.status(404).json({ message: 'Actividad no encontrada' });
+      }
+
+      console.error('Error al eliminar actividad:', error);
+      return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  };
+}
+
 export function createActivityController({
   taskRepository = prisma.task,
   userRepository = prisma.user,
