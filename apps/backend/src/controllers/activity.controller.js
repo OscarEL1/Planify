@@ -170,8 +170,7 @@ export function createActivityController({
     }
 
     const today = new Date();
-    const [dYear, dMonth, dDay] = dueDateValue.split('-').map(Number);
-    const dueDateOnly = new Date(dYear, dMonth - 1, dDay);
+    const dueDateOnly = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
     const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     if (dueDateOnly < todayOnly) {
       return res.status(400).json({ message: 'La fecha límite no puede ser en el pasado' });

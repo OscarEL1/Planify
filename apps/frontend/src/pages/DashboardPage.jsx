@@ -359,7 +359,7 @@ export default function DashboardPage() {
                   <button
                     key={activity.id}
                     type="button"
-                    onClick={() => navigate("/kanban")}
+                    onClick={() => navigate(`/activities/${activity.id}`)}
                     className="w-full flex items-center justify-between py-3 text-left hover:bg-[#F8F9FB] transition"
                   >
                     <div className="flex items-center gap-3">

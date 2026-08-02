@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Calendar, Link2, AlertTriangle, MessageSquare, CheckSquare } from 'lucide-react';
-import { useActivitiesQuery, useUpdateActivityStatusMutation } from '../../hooks/useActivities';
+import { useUpdateActivityStatusMutation } from '../../hooks/useActivities';
 import { useToast } from '../common/useToast';
 
 const columns = [
@@ -120,10 +120,9 @@ function KanbanCard({ activity, onClick }) {
   );
 }
 
-export default function KanbanBoard({ activities: filteredActivities }) {
+export default function KanbanBoard({ activities: filteredActivities, isObserver = false }) {
   const navigate = useNavigate();
-  const { data: allActivities, isLoading, isError } = useActivitiesQuery();
-  const activities = filteredActivities || allActivities;
+  const activities = filteredActivities || [];
   const updateStatusMutation = useUpdateActivityStatusMutation();
   const { showToast } = useToast();
 
@@ -154,76 +153,73 @@ export default function KanbanBoard({ activities: filteredActivities }) {
   const getColumnActivities = (status) =>
     activities?.filter((a) => a.status === status) || [];
 
-  if (isLoading) {
+  if (!activities || activities.length === 0) {
     return (
       <div className="bg-white border border-[#E4E7EC] rounded-2xl p-8 text-center text-sm text-[#64748B]">
-        Cargando tablero...
+        No hay actividades para mostrar.
       </div>
     );
   }
 
-  if (isError) {
-    return (
-      <div className="bg-[#FEF2F2] border border-red-200 rounded-2xl p-8 text-center text-sm text-[#EF4444]">
-        No se pudieron cargar las actividades.
-      </div>
-    );
+  const boardContent = (
+    <div className="grid grid-cols-4 gap-4">
+      {columns.map((column) => {
+        const columnActivities = getColumnActivities(column.id);
+        return (
+          <div key={column.id} className="flex flex-col">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: column.color }} />
+              <h3 className="text-sm font-semibold text-[#1D2433]">{column.title}</h3>
+              <span className="text-xs text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
+                {columnActivities.length}
+              </span>
+            </div>
+            <Droppable droppableId={column.id} isDropDisabled={isObserver}>
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={`flex-1 min-h-[200px] rounded-xl p-2 transition-colors ${
+                    snapshot.isDraggingOver ? 'bg-[#EEF2FF]' : ''
+                  }`}
+                  style={{ backgroundColor: snapshot.isDraggingOver ? '#EEF2FF' : column.bgColor }}
+                >
+                  <div className="flex flex-col gap-3">
+                    {columnActivities.map((activity, index) => (
+                      <Draggable key={activity.id} draggableId={activity.id} index={index} isDragDisabled={isObserver}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={{
+                              ...provided.draggableProps.style,
+                              opacity: snapshot.isDragging ? 0.8 : 1,
+                            }}
+                          >
+                            <KanbanCard activity={activity} onClick={goToDetail} />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                  </div>
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  if (isObserver) {
+    return boardContent;
   }
 
   return (
-    <>
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-4 gap-4">
-          {columns.map((column) => {
-            const columnActivities = getColumnActivities(column.id);
-            return (
-              <div key={column.id} className="flex flex-col">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: column.color }} />
-                  <h3 className="text-sm font-semibold text-[#1D2433]">{column.title}</h3>
-                  <span className="text-xs text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
-                    {columnActivities.length}
-                  </span>
-                </div>
-                <Droppable droppableId={column.id}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={`flex-1 min-h-[200px] rounded-xl p-2 transition-colors ${
-                        snapshot.isDraggingOver ? 'bg-[#EEF2FF]' : ''
-                      }`}
-                      style={{ backgroundColor: snapshot.isDraggingOver ? '#EEF2FF' : column.bgColor }}
-                    >
-                      <div className="flex flex-col gap-3">
-                        {columnActivities.map((activity, index) => (
-                          <Draggable key={activity.id} draggableId={activity.id} index={index}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                style={{
-                                  ...provided.draggableProps.style,
-                                  opacity: snapshot.isDragging ? 0.8 : 1,
-                                }}
-                              >
-                                <KanbanCard activity={activity} onClick={goToDetail} />
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                      </div>
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
-            );
-          })}
-        </div>
-      </DragDropContext>
-
-    </>
+    <DragDropContext onDragEnd={handleDragEnd}>
+      {boardContent}
+    </DragDropContext>
   );
 }

@@ -167,7 +167,7 @@ describe('PATCH /activities/:id', () => {
   });
 
   it('retorna 400 cuando no se envían campos soportados', async () => {
-    const response = await updateActivity('activity-1', { subtasks: [] });
+    const response = await updateActivity('activity-1', { foo: 'bar' });
 
     assert.equal(response.status, 400);
     assert.deepEqual(await response.json(), { message: 'No se enviaron campos para actualizar' });

@@ -97,7 +97,7 @@ describe('POST /activities', () => {
     description: 'Preparar las diapositivas del proyecto',
     assigneeId: teamMember.id,
     priority: 'alta',
-    dueDate: '2026-07-30T18:00:00.000Z',
+    dueDate: '2026-12-30T18:00:00.000Z',
     status: 'COMPLETADA',
     evidenceUrl: 'https://example.com/evidencia',
     comments: [{ text: 'Este comentario debe ignorarse' }],
