@@ -244,3 +244,27 @@ restricciones `ON DELETE CASCADE` de la base de datos. `evidenceUrl` forma parte
 de la propia actividad y se elimina junto con ella. Una eliminación exitosa
 retorna `204` sin contenido; un ID inexistente retorna `404` y un observador
 recibe `403`.
+
+## POST /activities/:id/comments
+
+Publica un comentario permanente en una actividad. Requiere un Bearer token de
+un usuario con rol `MIEMBRO_EQUIPO`; el autor se obtiene del JWT y no del body:
+
+```bash
+curl -X POST http://localhost:3000/activities/<activity-uuid>/comments \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Se completó la primera revisión"}'
+```
+
+La respuesta `201` incluye el texto, `createdAt` y el usuario autor con su
+nombre. Un comentario vacío retorna `400`, una actividad inexistente retorna
+`404` y un observador recibe `403`.
+
+## GET /activities/:id/comments
+
+Retorna con código `200` todos los comentarios de la actividad, ordenados por
+`createdAt` ascendente. Cada elemento incluye el texto, fecha de publicación y
+el nombre del autor en `user.name`. Requiere autenticación, pero está disponible
+tanto para miembros como para observadores. No existe endpoint DELETE de
+comentarios: son permanentes por diseño (RN-08).

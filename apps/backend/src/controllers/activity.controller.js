@@ -8,7 +8,13 @@ const ACTIVITY_INCLUDE = {
     select: { id: true, name: true, email: true, role: true },
   },
   comments: {
-    select: { id: true, text: true, userId: true, createdAt: true },
+    select: {
+      id: true,
+      text: true,
+      userId: true,
+      createdAt: true,
+      user: { select: { id: true, name: true } },
+    },
   },
   subtasks: {
     select: { id: true, text: true, done: true },
