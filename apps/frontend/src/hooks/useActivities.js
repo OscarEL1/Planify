@@ -87,18 +87,33 @@ export function useDeleteActivityMutation() {
 
 export function useAddCommentMutation() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({ activityId, text }) => addComment(activityId, text),
+
     onSuccess: (newComment, { activityId }) => {
+      // Actualiza la lista general de actividades.
       queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
         old.map((activity) => {
           if (activity.id !== activityId) return activity;
+
           return {
             ...activity,
             comments: [...(activity.comments || []), newComment],
           };
         })
       );
+
+      // Actualiza también el detalle de la actividad.
+      // Esto permite mostrar el comentario inmediatamente sin recargar.
+      queryClient.setQueryData(['activity', activityId], (old) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          comments: [...(old.comments || []), newComment],
+        };
+      });
     },
   });
 }
