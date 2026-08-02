@@ -164,12 +164,12 @@ describe('POST /activities', () => {
     });
   });
 
-  it('retorna 403 si un observador intenta registrar evidencia', async () => {
+  it('retorna 403 si un observador intenta crear una actividad', async () => {
     const response = await createActivity(validActivity, observerToken);
 
     assert.equal(response.status, 403);
     assert.deepEqual(await response.json(), {
-      message: 'Solo los miembros del equipo pueden registrar evidencia',
+      message: 'Solo los miembros del equipo pueden realizar acciones de escritura',
     });
   });
 

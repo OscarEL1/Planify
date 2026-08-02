@@ -39,10 +39,6 @@ function isValidEvidenceUrl(value) {
   }
 }
 
-function isTeamMember(req) {
-  return req.auth?.payload?.role === Role.MIEMBRO_EQUIPO;
-}
-
 function normalizeStatus(value) {
   return typeof value === 'string'
     ? value
@@ -159,12 +155,6 @@ export function createActivityController({
     if (!VALID_PRIORITIES.has(priority)) {
       return res.status(400).json({
         message: 'La prioridad debe ser ALTA, MEDIA o BAJA',
-      });
-    }
-
-    if (evidenceUrl && !isTeamMember(req)) {
-      return res.status(403).json({
-        message: 'Solo los miembros del equipo pueden registrar evidencia',
       });
     }
 
@@ -304,12 +294,6 @@ export function updateActivityController({
       }
 
       if (Object.hasOwn(body, 'evidenceUrl')) {
-        if (!isTeamMember(req)) {
-          return res.status(403).json({
-            message: 'Solo los miembros del equipo pueden modificar la evidencia',
-          });
-        }
-
         if (body.evidenceUrl !== null && typeof body.evidenceUrl !== 'string') {
           return res.status(400).json({ message: 'El enlace de evidencia no es válido' });
         }
@@ -457,12 +441,6 @@ export function updateActivityEvidenceController({
   taskRepository = prisma.task,
 } = {}) {
   return async function updateActivityEvidence(req, res) {
-    if (!isTeamMember(req)) {
-      return res.status(403).json({
-        message: 'Solo los miembros del equipo pueden modificar la evidencia',
-      });
-    }
-
     const body = req.body;
     if (
       !body
