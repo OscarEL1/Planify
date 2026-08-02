@@ -228,3 +228,19 @@ El enlace debe ser una URL válida con protocolo HTTP o HTTPS. La respuesta
 exitosa usa código `200` y retorna directamente la actividad actualizada. Una URL
 inválida o campos adicionales retornan `400`; un observador recibe `403` y un ID
 inexistente retorna `404`.
+
+## DELETE /activities/:id
+
+Elimina permanentemente una actividad. Requiere un Bearer token perteneciente a
+un usuario con rol `MIEMBRO_EQUIPO`:
+
+```bash
+curl -X DELETE http://localhost:3000/activities/<activity-uuid> \
+  -H "Authorization: Bearer <jwt>"
+```
+
+La eliminación de comentarios y subtareas relacionadas se realiza mediante las
+restricciones `ON DELETE CASCADE` de la base de datos. `evidenceUrl` forma parte
+de la propia actividad y se elimina junto con ella. Una eliminación exitosa
+retorna `204` sin contenido; un ID inexistente retorna `404` y un observador
+recibe `403`.
