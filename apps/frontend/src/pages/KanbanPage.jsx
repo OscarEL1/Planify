@@ -4,6 +4,7 @@ import KanbanBoard from '../components/kanban/KanbanBoard';
 import { useActivitiesQuery, useUsersQuery } from '../hooks/useActivities';
 import { useState, useMemo } from 'react';
 import ActivityFormModal from '../components/activities/ActivityFormModal';
+import { useAuth } from '../context/useAuth';
 
 const avatarColors = ['#4F46E5', '#0891B2', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777'];
 
@@ -22,11 +23,13 @@ function getAvatarColor(name) {
 export default function KanbanPage() {
   const { data: activities } = useActivitiesQuery();
   const { data: users } = useUsersQuery();
+  const { isObserver } = useAuth();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [filterAssignee, setFilterAssignee] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
   const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
   const [priorityDropdownOpen, setPriorityDropdownOpen] = useState(false);
+  
 
   const filteredActivities = useMemo(() => {
     if (!activities) return [];
@@ -62,14 +65,16 @@ export default function KanbanPage() {
               Gestiona las actividades de tu equipo escolar.
             </p>
           </div>
+          {!isObserver && (
           <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-semibold px-4 py-2.5 rounded-lg transition"
-          >
+             type="button"
+              onClick={() => setShowCreateModal(true)}
+                className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-semibold px-4 py-2.5 rounded-lg transition"
+                  >
             <Plus size={16} />
-            Nueva actividad
-          </button>
+              Nueva actividad
+            </button>
+        )}
         </div>
 
         {/* Filtros */}

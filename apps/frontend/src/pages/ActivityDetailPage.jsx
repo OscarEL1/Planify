@@ -1,51 +1,103 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, MessageSquare, CheckSquare, Plus, Calendar, Link2, Loader2 } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
-import { useActivityByIdQuery, useUsersQuery, useUpdateActivityMutation, useDeleteActivityMutation, useAddCommentMutation } from '../hooks/useActivities';
-import { useToast } from '../components/common/ToastProvider';
-import { getUser } from '../services/authService';
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Edit2,
+  Trash2,
+  MessageSquare,
+  CheckSquare,
+  Calendar,
+  Link2,
+  Loader2,
+} from "lucide-react";
+import Navbar from "../components/layout/Navbar";
+import {
+  useActivityByIdQuery,
+  useUpdateActivityMutation,
+  useDeleteActivityMutation,
+  useAddCommentMutation,
+} from "../hooks/useActivities";
+import { useToast } from "../components/common/useToast";
+import { useAuth } from "../context/useAuth";
 
 const statusStyles = {
-  PENDIENTE: { bg: '#F1F5F9', color: '#64748B', label: 'Pendiente', dot: '#94A3B8' },
-  EN_PROCESO: { bg: '#EFF6FF', color: '#3B82F6', label: 'En proceso', dot: '#3B82F6' },
-  EN_REVISION: { bg: '#F5F3FF', color: '#8B5CF6', label: 'En revisión', dot: '#8B5CF6' },
-  COMPLETADA: { bg: '#F0FDF4', color: '#22C55E', label: 'Completada', dot: '#22C55E' },
+  PENDIENTE: {
+    bg: "#F1F5F9",
+    color: "#64748B",
+    label: "Pendiente",
+    dot: "#94A3B8",
+  },
+  EN_PROCESO: {
+    bg: "#EFF6FF",
+    color: "#3B82F6",
+    label: "En proceso",
+    dot: "#3B82F6",
+  },
+  EN_REVISION: {
+    bg: "#F5F3FF",
+    color: "#8B5CF6",
+    label: "En revisión",
+    dot: "#8B5CF6",
+  },
+  COMPLETADA: {
+    bg: "#F0FDF4",
+    color: "#22C55E",
+    label: "Completada",
+    dot: "#22C55E",
+  },
 };
 
 const priorityStyles = {
-  ALTA: { bg: '#FEF2F2', color: '#EF4444', label: 'Alta' },
-  MEDIA: { bg: '#FFFBEB', color: '#F59E0B', label: 'Media' },
-  BAJA: { bg: '#F0FDF4', color: '#22C55E', label: 'Baja' },
+  ALTA: { bg: "#FEF2F2", color: "#EF4444", label: "Alta" },
+  MEDIA: { bg: "#FFFBEB", color: "#F59E0B", label: "Media" },
+  BAJA: { bg: "#F0FDF4", color: "#22C55E", label: "Baja" },
 };
 
-const avatarColors = ['#4F46E5', '#0891B2', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777'];
+const avatarColors = [
+  "#4F46E5",
+  "#0891B2",
+  "#059669",
+  "#D97706",
+  "#DC2626",
+  "#7C3AED",
+  "#DB2777",
+];
 
 function getInitials(name) {
-  if (!name) return '?';
-  return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name) {
   if (!name) return avatarColors[0];
   let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < name.length; i++)
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
 function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(dateStr).toLocaleDateString("es-MX", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 function formatTime(dateStr) {
-  if (!dateStr) return '';
+  if (!dateStr) return "";
 
-  return new Date(dateStr).toLocaleString('es-MX', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
+  return new Date(dateStr).toLocaleString("es-MX", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 }
 
@@ -53,56 +105,48 @@ export default function ActivityDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const isObserver = getUser()?.role === 'OBSERVADOR';
+  const { isObserver } = useAuth();
   const { data: activity, isLoading, isError } = useActivityByIdQuery(id);
-  const { data: users } = useUsersQuery();
   const updateMutation = useUpdateActivityMutation();
   const deleteMutation = useDeleteActivityMutation();
   const addCommentMutation = useAddCommentMutation();
 
-  const [commentDraft, setCommentDraft] = useState('');
-  const [newSubtask, setNewSubtask] = useState('');
+  const [commentDraft, setCommentDraft] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const status = statusStyles[activity?.status] || statusStyles.PENDIENTE;
   const priority = priorityStyles[activity?.priority] || priorityStyles.MEDIA;
-  const completedSubtasks = activity?.subtasks?.filter((s) => s.done).length || 0;
+  const completedSubtasks =
+    activity?.subtasks?.filter((s) => s.done).length || 0;
   const totalSubtasks = activity?.subtasks?.length || 0;
-  const subtaskProgress = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
+  const subtaskProgress =
+    totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
 
   const handleSendComment = async () => {
     if (!commentDraft.trim()) return;
     const text = commentDraft.trim();
-    setCommentDraft('');
+    setCommentDraft("");
     try {
       await addCommentMutation.mutateAsync({ activityId: id, text });
     } catch {
-      showToast('No fue posible agregar el comentario.', 'error');
+      showToast("No fue posible agregar el comentario.", "error");
     }
   };
 
   const handleToggleSubtask = async (subtask) => {
-    const updatedSubtasks = activity.subtasks.map((s) =>
-      s.id === subtask.id ? { ...s, done: !s.done } : s
-    );
-    try {
-      await updateMutation.mutateAsync({ id, payload: { subtasks: updatedSubtasks } });
-    } catch {
-      showToast('No fue posible actualizar la subtarea.', 'error');
-    }
-  };
+    if (isObserver) return;
 
-  const handleAddSubtask = async () => {
-    if (!newSubtask.trim()) return;
-    const updatedSubtasks = [
-      ...(activity.subtasks || []),
-      { text: newSubtask.trim(), done: false },
-    ];
-    setNewSubtask('');
+    const updatedSubtasks = activity.subtasks.map((s) =>
+      s.id === subtask.id ? { ...s, done: !s.done } : s,
+    );
+
     try {
-      await updateMutation.mutateAsync({ id, payload: { subtasks: updatedSubtasks } });
+      await updateMutation.mutateAsync({
+        id,
+        payload: { subtasks: updatedSubtasks },
+      });
     } catch {
-      showToast('No fue posible agregar la subtarea.', 'error');
+      showToast("No fue posible actualizar la subtarea.", "error");
     }
   };
 
@@ -113,16 +157,19 @@ export default function ActivityDetailPage() {
     }
     try {
       await deleteMutation.mutateAsync(id);
-      showToast('Actividad eliminada.', 'success');
-      navigate('/kanban');
+      showToast("Actividad eliminada.", "success");
+      navigate("/kanban");
     } catch {
-      showToast('No fue posible eliminar la actividad.', 'error');
+      showToast("No fue posible eliminar la actividad.", "error");
     }
   };
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen w-full" style={{ backgroundColor: '#F9FAFB' }}>
+      <div
+        className="flex min-h-screen w-full"
+        style={{ backgroundColor: "#F9FAFB" }}
+      >
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
           <Loader2 size={24} className="animate-spin text-[#4F46E5]" />
@@ -133,7 +180,10 @@ export default function ActivityDetailPage() {
 
   if (isError || !activity) {
     return (
-      <div className="flex min-h-screen w-full" style={{ backgroundColor: '#F9FAFB' }}>
+      <div
+        className="flex min-h-screen w-full"
+        style={{ backgroundColor: "#F9FAFB" }}
+      >
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
           <p className="text-[#64748B]">Actividad no encontrada.</p>
@@ -143,7 +193,10 @@ export default function ActivityDetailPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full" style={{ backgroundColor: '#F9FAFB' }}>
+    <div
+      className="flex min-h-screen w-full"
+      style={{ backgroundColor: "#F9FAFB" }}
+    >
       <Navbar />
 
       <main className="flex-1 px-8 py-10">
@@ -152,237 +205,272 @@ export default function ActivityDetailPage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => navigate('/kanban')}
+              onClick={() => navigate("/kanban")}
               className="flex items-center gap-1 text-sm text-[#64748B] hover:text-[#1D2433] transition"
             >
               <ArrowLeft size={16} />
               Tablero
             </button>
             <span className="text-[#A0AEC0]">/</span>
-            <span className="text-sm font-medium text-[#1D2433]">Detalle de actividad</span>
+            <span className="text-sm font-medium text-[#1D2433]">
+              Detalle de actividad
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => navigate(`/activities/${id}/edit`)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E4E7EC] text-sm font-medium text-[#1D2433] hover:bg-[#F8F9FB] transition"
-            >
-              <Edit2 size={14} />
-              Editar
-            </button>
-            <button
-              type="button"
-              onClick={handleDelete}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition ${
-                confirmingDelete
-                  ? 'bg-[#EF4444] border-[#EF4444] text-white'
-                  : 'border-[#FCA5A5] text-[#EF4444] hover:bg-[#FEF2F2]'
-              }`}
-            >
-              <Trash2 size={14} />
-              {confirmingDelete ? '¿Confirmar?' : 'Eliminar'}
-            </button>
+            {!isObserver && (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/activities/${id}/edit`)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E4E7EC] text-sm font-medium text-[#1D2433] hover:bg-[#F8F9FB] transition"
+                >
+                  <Edit2 size={14} />
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition ${
+                    confirmingDelete
+                      ? "bg-[#EF4444] border-[#EF4444] text-white"
+                      : "border-[#FCA5A5] text-[#EF4444] hover:bg-[#FEF2F2]"
+                  }`}
+                >
+                  <Trash2 size={14} />
+                  {confirmingDelete ? "¿Confirmar?" : "Eliminar"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
-
-                
 
         {/* Contenido principal */}
         <div className="flex gap-6 items-start">
           <div className="flex-1 min-w-0">
-
             {/* Comments */}
             <div className="mt-8">
-<div className="mt-8">
-  <div className="flex items-center gap-2 mb-4">
-    <MessageSquare size={16} className="text-[#1D2433]" />
-    <h2 className="text-sm font-semibold text-[#1D2433]">Comentarios</h2>
-    <span className="text-xs text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
-      {activity.comments?.length || 0}
-    </span>
-  </div>
-
-  <div className="flex flex-col gap-4">
-    {[...(activity.comments || [])]
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-      .map((comment) => (
-        <div key={comment.id} className="flex items-start gap-3">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
-            style={{ backgroundColor: getAvatarColor(comment.user?.name) }}
-          >
-            {getInitials(comment.user?.name)}
-          </div>
-
-          <div className="flex-1 bg-[#F8F9FB] rounded-lg px-4 py-3">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm font-semibold text-[#1D2433]">
-                {comment.user?.name || 'Usuario'}
-              </span>
-
-              <span className="text-xs text-[#A0AEC0]">
-                {formatTime(comment.createdAt)}
-              </span>
-            </div>
-
-            <p className="text-sm text-[#1D2433]">
-              {comment.text}
-            </p>
-          </div>
-        </div>
-      ))}
-
-    {/* Campo para agregar comentarios — oculto para OBSERVADOR */}
-    {!isObserver && (
-      <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-full bg-[#4F46E5] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-          TÚ
-        </div>
-
-        <div className="flex-1 relative">
-          <input
-            type="text"
-            value={commentDraft}
-            onChange={(e) => setCommentDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleSendComment();
-              }
-            }}
-            disabled={addCommentMutation.isPending}
-            placeholder={
-              addCommentMutation.isPending
-                ? 'Publicando comentario...'
-                : 'Escribe un comentario y presiona Enter...'
-            }
-            className="w-full bg-white border border-[#E4E7EC] rounded-lg px-4 py-3 text-sm text-[#1D2433] placeholder-[#A0AEC0] outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-60"
-          />
-          </div>
-        </div>
-      )}
-    </div>
-  </div>
-</div>
-
-          {/* Right sidebar */}
-          <div className="w-72 flex-shrink-0">
-            {/* Información */}
-            <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5 mb-4">
-              <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-4">Información</h3>
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Estado</span>
-                  <span className="flex items-center gap-1.5 text-sm" style={{ color: status.color }}>
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: status.dot }} />
-                    {status.label}
+              <div className="mt-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <MessageSquare size={16} className="text-[#1D2433]" />
+                  <h2 className="text-sm font-semibold text-[#1D2433]">
+                    Comentarios
+                  </h2>
+                  <span className="text-xs text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
+                    {activity.comments?.length || 0}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Prioridad</span>
-                  <span
-                    className="text-xs font-medium px-2 py-0.5 rounded-full"
-                    style={{ backgroundColor: priority.bg, color: priority.color }}
-                  >
-                    {priority.label}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Responsable</span>
-                  {activity.assignee ? (
-                    <div className="flex items-center gap-1.5">
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
-                        style={{ backgroundColor: getAvatarColor(activity.assignee.name) }}
-                      >
-                        {getInitials(activity.assignee.name)}
+
+                <div className="flex flex-col gap-4">
+                  {[...(activity.comments || [])]
+                    .sort(
+                      (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+                    )
+                    .map((comment) => (
+                      <div key={comment.id} className="flex items-start gap-3">
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+                          style={{
+                            backgroundColor: getAvatarColor(comment.user?.name),
+                          }}
+                        >
+                          {getInitials(comment.user?.name)}
+                        </div>
+
+                        <div className="flex-1 bg-[#F8F9FB] rounded-lg px-4 py-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-[#1D2433]">
+                              {comment.user?.name || "Usuario"}
+                            </span>
+
+                            <span className="text-xs text-[#A0AEC0]">
+                              {formatTime(comment.createdAt)}
+                            </span>
+                          </div>
+
+                          <p className="text-sm text-[#1D2433]">
+                            {comment.text}
+                          </p>
+                        </div>
                       </div>
-                      <span className="text-sm text-[#1D2433]">{activity.assignee.name}</span>
+                    ))}
+
+                  {/* Campo para agregar comentarios — oculto para OBSERVADOR */}
+                  {!isObserver && (
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#4F46E5] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                        TÚ
+                      </div>
+
+                      <div className="flex-1 relative">
+                        <input
+                          type="text"
+                          value={commentDraft}
+                          onChange={(e) => setCommentDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleSendComment();
+                            }
+                          }}
+                          disabled={addCommentMutation.isPending}
+                          placeholder={
+                            addCommentMutation.isPending
+                              ? "Publicando comentario..."
+                              : "Escribe un comentario y presiona Enter..."
+                          }
+                          className="w-full bg-white border border-[#E4E7EC] rounded-lg px-4 py-3 text-sm text-[#1D2433] placeholder-[#A0AEC0] outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-60"
+                        />
+                      </div>
                     </div>
-                  ) : (
-                    <span className="text-sm text-[#A0AEC0]">Sin asignar</span>
                   )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Fecha límite</span>
-                  <span className="flex items-center gap-1 text-sm text-[#1D2433]">
-                    <Calendar size={12} />
-                    {activity.dueDate ? formatDate(activity.dueDate) : 'Sin fecha'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Subtareas</span>
-                  <span className="text-sm text-[#1D2433]">{completedSubtasks}/{totalSubtasks} completadas</span>
-                </div>
-                {totalSubtasks > 0 && (
-                  <div className="w-full h-1.5 bg-[#E4E7EC] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#4F46E5] rounded-full" style={{ width: `${subtaskProgress}%` }} />
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Subtareas */}
-            <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5 mb-4">
-              <div className="flex items-center gap-2 mb-4">
-                <CheckSquare size={16} className="text-[#1D2433]" />
-                <h3 className="text-sm font-semibold text-[#1D2433]">Subtareas</h3>
-              </div>
-              <div className="flex flex-col gap-2">
-                {activity.subtasks?.map((subtask) => (
-                  <label key={subtask.id} className="flex items-center gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={subtask.done}
-                      onChange={() => handleToggleSubtask(subtask)}
-                      className="w-4 h-4 rounded accent-[#4F46E5]"
-                    />
-                    <span className={`text-sm ${subtask.done ? 'line-through text-[#A0AEC0]' : 'text-[#1D2433]'}`}>
-                      {subtask.text}
+            {/* Right sidebar */}
+            <div className="w-72 flex-shrink-0">
+              {/* Información */}
+              <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5 mb-4">
+                <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-4">
+                  Información
+                </h3>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#64748B]">Estado</span>
+                    <span
+                      className="flex items-center gap-1.5 text-sm"
+                      style={{ color: status.color }}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: status.dot }}
+                      />
+                      {status.label}
                     </span>
-                  </label>
-                ))}
-                <div className="flex items-center gap-2 mt-2">
-                  <input
-                    type="text"
-                    value={newSubtask}
-                    onChange={(e) => setNewSubtask(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSubtask(); } }}
-                    placeholder="Añadir subtarea..."
-                    className="flex-1 text-sm text-[#1D2433] placeholder-[#A0AEC0] outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddSubtask}
-                    className="w-7 h-7 rounded-lg bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center hover:bg-[#E0E7FF] transition"
-                  >
-                    <Plus size={14} />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Evidencia */}
-            {activity.evidenceUrl && (
-              <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Link2 size={16} className="text-[#1D2433]" />
-                  <h3 className="text-sm font-semibold text-[#1D2433]">Evidencia</h3>
-                </div>
-                <a
-                  href={activity.evidenceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-[#4F46E5] hover:underline break-all"
-                >
-                  {activity.evidenceUrl}
-                </a>
-              </div>
-            )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#64748B]">Prioridad</span>
+                    <span
+                      className="text-xs font-medium px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: priority.bg,
+                        color: priority.color,
+                      }}
+                    >
+                      {priority.label}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#64748B]">Responsable</span>
+                    {activity.assignee ? (
+                      <div className="flex items-center gap-1.5">
+                        <div
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
+                          style={{
+                            backgroundColor: getAvatarColor(
+                              activity.assignee.name,
+                            ),
+                          }}
+                        >
+                          {getInitials(activity.assignee.name)}
+                        </div>
+                        <span className="text-sm text-[#1D2433]">
+                          {activity.assignee.name}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-[#A0AEC0]">
+                        Sin asignar
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#64748B]">Fecha límite</span>
+                    <span className="flex items-center gap-1 text-sm text-[#1D2433]">
+                      <Calendar size={12} />
+                      {activity.dueDate
+                        ? formatDate(activity.dueDate)
+                        : "Sin fecha"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#64748B]">Subtareas</span>
+                    <span className="text-sm text-[#1D2433]">
+                      {completedSubtasks}/{totalSubtasks} completadas
+                    </span>
+                  </div>
+                  {totalSubtasks > 0 && (
+                    <div className="w-full h-1.5 bg-[#E4E7EC] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#4F46E5] rounded-full"
+                        style={{ width: `${subtaskProgress}%` }}
+                      />
                     </div>
-        </div>
+                  )}
+                </div>
+              </div>
 
-        {/* Cierre del contenedor principal: contenido + sidebar */}
+              {/* Subtareas */}
+              <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5 mb-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <CheckSquare size={16} className="text-[#1D2433]" />
+                  <h3 className="text-sm font-semibold text-[#1D2433]">
+                    Subtareas
+                  </h3>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {activity.subtasks?.map((subtask) => (
+                    <label
+                      key={subtask.id}
+                      className={`flex items-center gap-2.5 ${
+                        isObserver ? "cursor-default" : "cursor-pointer"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={subtask.done}
+                        disabled={isObserver}
+                        onChange={() => handleToggleSubtask(subtask)}
+                        className={`w-4 h-4 rounded accent-[#4F46E5] ${
+                          isObserver
+                            ? "cursor-default opacity-70"
+                            : "cursor-pointer"
+                        }`}
+                      />
+                      <span
+                        className={`text-sm ${subtask.done ? "line-through text-[#A0AEC0]" : "text-[#1D2433]"}`}
+                      >
+                        {subtask.text}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Evidencia */}
+              {activity.evidenceUrl && (
+                <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Link2 size={16} className="text-[#1D2433]" />
+                    <h3 className="text-sm font-semibold text-[#1D2433]">
+                      Evidencia
+                    </h3>
+                  </div>
+                  <a
+                    href={activity.evidenceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-[#4F46E5] hover:underline break-all"
+                  >
+                    {activity.evidenceUrl}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Cierre del contenedor principal: contenido + sidebar */}
         </div>
       </main>
     </div>

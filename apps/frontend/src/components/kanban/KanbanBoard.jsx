@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Calendar, Link2, AlertTriangle, MessageSquare, CheckSquare } from 'lucide-react';
 import { useActivitiesQuery, useUpdateActivityStatusMutation } from '../../hooks/useActivities';
-import { useToast } from '../common/ToastProvider';
+import { useToast } from '../common/useToast';
 
 const columns = [
   { id: 'PENDIENTE', title: 'Pendiente', color: '#94A3B8', bgColor: '#F1F5F9' },
