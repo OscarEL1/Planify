@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getActivities,
+  getActivityStats,
   getActivityById,
   createActivity,
   updateActivity,
@@ -14,8 +15,17 @@ import {
 export const ACTIVITIES_KEY = ['activities'];
 export const USERS_KEY = ['users'];
 
+export const ACTIVITY_STATS_KEY = ['activities', 'stats'];
+
 export function useActivitiesQuery() {
   return useQuery({ queryKey: ACTIVITIES_KEY, queryFn: getActivities });
+}
+
+export function useActivityStatsQuery() {
+  return useQuery({
+    queryKey: ACTIVITY_STATS_KEY,
+    queryFn: getActivityStats,
+  });
 }
 
 export function useActivityByIdQuery(id) {
@@ -47,15 +57,24 @@ export function useUpdateActivityMutation() {
     },
   });
 }
-
 export function useUpdateActivityStatusMutation() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({ id, status }) => updateActivityStatus(id, status),
+
     onSuccess: (updatedActivity) => {
       queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
-        old.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity))
+        old.map((activity) =>
+          activity.id === updatedActivity.id ? updatedActivity : activity
+        )
       );
+
+      // HU Panel de avance:
+      // vuelve a consultar las estadísticas al cambiar un estatus
+      queryClient.invalidateQueries({
+        queryKey: ACTIVITY_STATS_KEY,
+      });
     },
   });
 }
@@ -69,6 +88,8 @@ export function useUpdateActivityEvidenceMutation() {
       queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
         old.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity))
       );
+
+        
     },
   });
 }

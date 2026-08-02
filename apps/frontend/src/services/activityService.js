@@ -7,6 +7,11 @@ export async function getActivities() {
   return response.data;
 }
 
+export async function getActivityStats() {
+  const response = await api.get(`${RESOURCE}/stats`);
+  return response.data;
+}
+
 export async function getActivityById(id) {
   const response = await api.get(`${RESOURCE}/${id}`);
   return response.data;

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { TrendingUp, CheckCircle2, Clock, BarChart3 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { getUser } from '../services/authService';
-import { useActivitiesQuery, useUsersQuery } from '../hooks/useActivities';
+import { useActivitiesQuery, useUsersQuery, useActivityStatsQuery, } from '../hooks/useActivities';
 
 const statusColors = {
   PENDIENTE: '#94A3B8',
@@ -90,16 +90,18 @@ function DonutChart({ data, size = 140 }) {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const user = getUser();
-  const { data: activities } = useActivitiesQuery();
-  const { data: users } = useUsersQuery();
+const user = getUser();
 
-  const total = activities?.length || 0;
-  const completed = activities?.filter((a) => a.status === 'COMPLETADA').length || 0;
-  const inProgress = activities?.filter((a) => a.status === 'EN_PROCESO').length || 0;
-  const inReview = activities?.filter((a) => a.status === 'EN_REVISION').length || 0;
-  const pending = activities?.filter((a) => a.status === 'PENDIENTE').length || 0;
-  const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+const { data: activities } = useActivitiesQuery();
+const { data: users } = useUsersQuery();
+const { data: stats } = useActivityStatsQuery();
+
+const total = stats?.total ?? 0;
+const completed = stats?.byStatus?.COMPLETADA ?? 0;
+const inProgress = stats?.byStatus?.EN_PROCESO ?? 0;
+const inReview = stats?.byStatus?.EN_REVISION ?? 0;
+const pending = stats?.byStatus?.PENDIENTE ?? 0;
+const progressPercent = stats?.completionPercentage ?? 0;
 
   const donutData = [
     { label: 'Pendiente', value: pending, color: statusColors.PENDIENTE },
