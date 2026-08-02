@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
-  X, Paperclip, MessageSquare, Link2, Calendar, Loader2, Send, Trash2, CircleUserRound, CheckSquare, Plus, ChevronDown, Check,
+  X, MessageSquare, Link2, Calendar,  Send, Trash2, CircleUserRound, CheckSquare, Plus, ChevronDown, Check,
 } from 'lucide-react';
 import {
   useActivitiesQuery,
@@ -172,11 +172,11 @@ export default function ActivityFormModal({
   }, [isOpen, mode, initialData, reset]);
 
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending || evidenceMutation.isPending;
   const isSubmitting =
   createMutation.isPending ||
   updateMutation.isPending ||
-  updateStatusMutation.isPending;
+  updateStatusMutation.isPending ||
+  evidenceMutation.isPending;
 
   const selectedPriority = watch('priority');
   const selectedStatus = watch('status');
@@ -211,39 +211,11 @@ export default function ActivityFormModal({
   };
 
   const onSubmit = async (formData) => {
-
-    const payload = {
-      title: formData.title?.trim(),
-      description: formData.description?.trim() || null,
-      status: formData.status,
-      priority: formData.priority,
-      dueDate: formData.dueDate || null,
-      assigneeId: formData.assigneeId || null,
-      subtasks,
-    };
-    try {
-      if (mode === 'edit') {
-        await updateMutation.mutateAsync({ id: initialData.id, payload });
-
-        // HU evidencia: se actualiza por su propio endpoint
-        // (PATCH /activities/:id/evidence), no por el PATCH general.
-        const previousEvidenceUrl = initialData.evidenceUrl || '';
-        const newEvidenceUrl = formData.evidenceUrl?.trim() || '';
-        if (!isObserver && newEvidenceUrl !== previousEvidenceUrl) {
-         await evidenceMutation.mutateAsync({ id: initialData.id, evidenceUrl: newEvidenceUrl });
-        }
-
-        showToast('Actividad actualizada correctamente.', 'success');
-      } else {
-        await createMutation.mutateAsync({ ...payload, evidenceUrl: formData.evidenceUrl?.trim() || null });
-        showToast('Actividad creada correctamente.', 'success');
-
   const payload = {
     title: formData.title?.trim(),
     description: formData.description?.trim() || null,
     priority: formData.priority,
     dueDate: formData.dueDate || null,
-    evidenceUrl: formData.evidenceUrl?.trim() || null,
     assigneeId: formData.assigneeId || null,
     subtasks,
   };
@@ -251,18 +223,31 @@ export default function ActivityFormModal({
   try {
     if (mode === 'edit') {
       const statusChanged = formData.status !== initialData.status;
+      const previousEvidenceUrl = initialData.evidenceUrl || '';
+      const newEvidenceUrl = formData.evidenceUrl?.trim() || '';
+      const evidenceChanged = newEvidenceUrl !== previousEvidenceUrl;
 
+      // Actualiza los datos generales de la actividad.
       await updateMutation.mutateAsync({
         id: initialData.id,
         payload,
       });
 
+      // El estado utiliza su endpoint dedicado.
       if (statusChanged) {
         await updateStatusMutation.mutateAsync({
           id: initialData.id,
           status: formData.status,
         });
+      }
 
+      // La evidencia utiliza su endpoint dedicado.
+      // Los observadores no pueden modificarla.
+      if (!isObserver && evidenceChanged) {
+        await evidenceMutation.mutateAsync({
+          id: initialData.id,
+          evidenceUrl: newEvidenceUrl,
+        });
       }
 
       showToast('Actividad actualizada correctamente.', 'success');
@@ -270,6 +255,7 @@ export default function ActivityFormModal({
       await createMutation.mutateAsync({
         ...payload,
         status: formData.status,
+        evidenceUrl: formData.evidenceUrl?.trim() || null,
       });
 
       showToast('Actividad creada correctamente.', 'success');
@@ -286,19 +272,16 @@ export default function ActivityFormModal({
 };
 
   const handleDelete = async () => {
-    if (!confirmingDelete) {
-      setConfirmingDelete(true);
-      return;
-    }
-    try {
-      await deleteMutation.mutateAsync(initialData.id);
-      showToast('Actividad eliminada correctamente.', 'success');
-      onSuccess?.();
-      onClose();
-    } catch {
-      showToast('No fue posible eliminar la actividad.', 'error');
-    }
-  };
+  try {
+    await deleteMutation.mutateAsync(initialData.id);
+    showToast('Actividad eliminada correctamente.', 'success');
+    setConfirmingDelete(false);
+    onSuccess?.();
+    onClose();
+  } catch {
+    showToast('No fue posible eliminar la actividad.', 'error');
+  }
+};
 
   if (!isOpen) return null;
 
@@ -675,26 +658,21 @@ export default function ActivityFormModal({
           )}
         </form>
 
-        {/* Footer */}
+        
+                {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-[#E4E7EC] bg-[#F8F9FB] rounded-b-2xl">
-          {mode === 'edit' ? (
+          {mode === 'edit' && !isObserver ? (
             <button
               type="button"
-              onClick={handleDelete}
+              onClick={() => setConfirmingDelete(true)}
               disabled={deleteMutation.isPending}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-semibold transition disabled:opacity-60 ${
-                confirmingDelete
-                  ? 'bg-[#EF4444] border-[#EF4444] text-white hover:bg-[#DC2626]'
-                  : 'border-[#FCA5A5] text-[#EF4444] hover:bg-[#FEF2F2]'
-              }`}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-[#FCA5A5] text-[#EF4444] text-sm font-semibold transition hover:bg-[#FEF2F2] disabled:opacity-60"
             >
               <Trash2 size={15} />
-              {deleteMutation.isPending ? 'Eliminando...' : confirmingDelete ? '¿Confirmar?' : 'Eliminar actividad'}
+              Eliminar actividad
             </button>
           ) : (
-            <button type="button" title="Adjuntar archivo (próximamente)" disabled className="text-[#A0AEC0] disabled:opacity-60">
-              <Paperclip size={18} />
-            </button>
+            <div />
           )}
 
           <div className="flex items-center gap-3">
@@ -706,17 +684,71 @@ export default function ActivityFormModal({
             >
               Cancelar
             </button>
+
             <button
               type="button"
               onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting}
               className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar cambios' : 'Guardar actividad'}
+              {isSubmitting
+                ? 'Guardando...'
+                : mode === 'edit'
+                  ? 'Guardar cambios'
+                  : 'Guardar actividad'}
             </button>
           </div>
         </div>
       </div>
+
+      {/* HU Sprint 4 - Modal de confirmación para eliminar actividad */}
+      {confirmingDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FEF2F2]">
+                <Trash2 size={20} className="text-[#EF4444]" />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-[#1D2433]">
+                  Eliminar actividad
+                </h3>
+                <p className="text-sm text-[#64748B]">
+                  Esta acción es irreversible.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-sm text-[#475569] mb-6">
+              ¿Estás seguro de que deseas eliminar la actividad{' '}
+              <span className="font-semibold text-[#1D2433]">
+                "{initialData?.title}"
+              </span>?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(false)}
+                disabled={deleteMutation.isPending}
+                className="px-4 py-2 rounded-lg border border-[#E4E7EC] text-sm font-semibold text-[#1D2433] hover:bg-[#F8F9FB] disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-[#EF4444] text-white text-sm font-semibold hover:bg-[#DC2626] disabled:opacity-60"
+              >
+                {deleteMutation.isPending ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
