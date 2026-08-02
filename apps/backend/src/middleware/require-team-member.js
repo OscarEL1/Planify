@@ -1,17 +1,17 @@
 import { Role } from '@prisma/client';
 
-export function createRequireTeamMember({
-  forbiddenMessage = 'Solo los miembros del equipo pueden realizar esta acción',
-} = {}) {
-  return function requireConfiguredTeamMember(req, res, next) {
-    if (req.auth?.payload?.role !== Role.MIEMBRO_EQUIPO) {
-      return res.status(403).json({ message: forbiddenMessage });
-    }
+const WRITE_METHODS = new Set(['POST', 'PATCH', 'DELETE']);
 
+export function enforceWriteRole(req, res, next) {
+  if (!WRITE_METHODS.has(req.method)) {
     return next();
-  };
-}
+  }
 
-export const requireTeamMember = createRequireTeamMember({
-  forbiddenMessage: 'Solo los miembros del equipo pueden eliminar actividades',
-});
+  if (req.auth?.payload?.role !== Role.MIEMBRO_EQUIPO) {
+    return res.status(403).json({
+      message: 'Solo los miembros del equipo pueden realizar acciones de escritura',
+    });
+  }
+
+  return next();
+}

@@ -305,3 +305,20 @@ La respuesta usa el siguiente formato:
 
 Las actividades sin responsable se incluyen en `total` y `byStatus`, pero no en
 `progressByAssignee`. Los porcentajes se redondean al entero más cercano.
+
+## Control de rol para escrituras
+
+Todas las rutas de negocio bajo `/activities` requieren autenticación. Un
+middleware transversal permite los métodos GET tanto a `MIEMBRO_EQUIPO` como a
+`OBSERVADOR`, pero restringe POST, PATCH y DELETE a `MIEMBRO_EQUIPO`. Un intento
+de escritura sin el rol requerido retorna `403`:
+
+```json
+{
+  "message": "Solo los miembros del equipo pueden realizar acciones de escritura"
+}
+```
+
+Los endpoints POST de `/auth` no forman parte de esta restricción: login,
+registro y logout deben permanecer disponibles para completar el ciclo de
+autenticación. El token emitido por login incluye el campo `role` en su payload.

@@ -153,7 +153,7 @@ describe('PATCH /activities/:id/evidence', () => {
 
     assert.equal(response.status, 403);
     assert.deepEqual(await response.json(), {
-      message: 'Solo los miembros del equipo pueden modificar la evidencia',
+      message: 'Solo los miembros del equipo pueden realizar acciones de escritura',
     });
     assert.equal(updateCalls, 0);
   });

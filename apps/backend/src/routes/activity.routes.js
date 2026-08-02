@@ -11,12 +11,8 @@ import {
 import { getActivityStatsController } from '../controllers/activity-stats.controller.js';
 import { createCommentController, getCommentsController } from '../controllers/comment.controller.js';
 import { createAuthenticateToken } from '../middleware/authenticate-token.js';
-import { createRequireTeamMember, requireTeamMember } from '../middleware/require-team-member.js';
+import { enforceWriteRole } from '../middleware/require-team-member.js';
 import { tokenBlacklist } from '../services/token-blacklist.js';
-
-const requireCommentingMember = createRequireTeamMember({
-  forbiddenMessage: 'Solo los miembros del equipo pueden publicar comentarios',
-});
 
 export function createActivityRouter(dependencies = {}) {
   const router = Router();
@@ -26,21 +22,18 @@ export function createActivityRouter(dependencies = {}) {
     blacklist: dependencies.tokenBlacklist ?? tokenBlacklist,
   });
 
-  router.get('/', authenticateToken, getActivitiesController(dependencies));
-  router.get('/stats', authenticateToken, getActivityStatsController(dependencies));
-  router.get('/:id', authenticateToken, getActivityByIdController(dependencies));
-  router.post('/', authenticateToken, createActivityController(dependencies));
-  router.patch('/:id/status', authenticateToken, updateActivityStatusController(dependencies));
-  router.patch('/:id/evidence', authenticateToken, updateActivityEvidenceController(dependencies));
-  router.patch('/:id', authenticateToken, updateActivityController(dependencies));
-  router.delete('/:id', authenticateToken, requireTeamMember, deleteActivityController(dependencies));
-  router.get('/:id/comments', authenticateToken, getCommentsController(dependencies));
-  router.post(
-    '/:id/comments',
-    authenticateToken,
-    requireCommentingMember,
-    createCommentController(dependencies),
-  );
+  router.use(authenticateToken, enforceWriteRole);
+
+  router.get('/', getActivitiesController(dependencies));
+  router.get('/stats', getActivityStatsController(dependencies));
+  router.get('/:id', getActivityByIdController(dependencies));
+  router.post('/', createActivityController(dependencies));
+  router.patch('/:id/status', updateActivityStatusController(dependencies));
+  router.patch('/:id/evidence', updateActivityEvidenceController(dependencies));
+  router.patch('/:id', updateActivityController(dependencies));
+  router.delete('/:id', deleteActivityController(dependencies));
+  router.get('/:id/comments', getCommentsController(dependencies));
+  router.post('/:id/comments', createCommentController(dependencies));
 
   return router;
 }

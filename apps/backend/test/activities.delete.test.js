@@ -109,7 +109,7 @@ describe('DELETE /activities/:id', () => {
 
     assert.equal(response.status, 403);
     assert.deepEqual(await response.json(), {
-      message: 'Solo los miembros del equipo pueden eliminar actividades',
+      message: 'Solo los miembros del equipo pueden realizar acciones de escritura',
     });
     assert.deepEqual(repositoryCalls, []);
   });

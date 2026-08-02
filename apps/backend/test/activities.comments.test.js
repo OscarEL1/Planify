@@ -159,7 +159,7 @@ describe('comentarios de actividades', () => {
 
     assert.equal(response.status, 403);
     assert.deepEqual(await response.json(), {
-      message: 'Solo los miembros del equipo pueden publicar comentarios',
+      message: 'Solo los miembros del equipo pueden realizar acciones de escritura',
     });
     assert.equal(createdData, undefined);
   });
