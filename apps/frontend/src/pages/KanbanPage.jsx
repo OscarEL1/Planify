@@ -195,7 +195,7 @@ export default function KanbanPage() {
           </div>
         </div>
 
-        <KanbanBoard activities={filteredActivities} />
+        <KanbanBoard activities={filteredActivities} isObserver={isObserver} />
 
         <ActivityFormModal
           mode="create"
