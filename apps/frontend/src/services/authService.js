@@ -35,6 +35,48 @@ export function getToken() {
   return localStorage.getItem('planify_token');
 }
 
+export function getTokenPayload() {
+  const token = getToken();
+  if (!token) return null;
+
+  try {
+    const [, payload] = token.split('.');
+    if (!payload) return null;
+
+    const base64 = payload
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+
+    const decoded = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((char) =>
+          `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`
+        )
+        .join('')
+    );
+
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+}
+
+export function getSessionUser() {
+  const payload = getTokenPayload();
+
+  if (payload) {
+    return {
+      id: payload.sub,
+      name: payload.name,
+      email: payload.email,
+      role: payload.role,
+    };
+  }
+
+  return getUser();
+}
+
 // HU-17: usado por Navbar/DashboardPage para mostrar los datos del usuario
 export function getUser() {
   const raw = localStorage.getItem('user');

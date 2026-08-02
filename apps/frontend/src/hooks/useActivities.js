@@ -1,11 +1,31 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getActivities, getActivityById, createActivity, updateActivity, deleteActivity, getUsers, addComment } from '../services/activityService';
+import {
+  getActivities,
+  getActivityStats,
+  getActivityById,
+  createActivity,
+  updateActivity,
+  updateActivityStatus,
+  updateActivityEvidence,
+  deleteActivity,
+  getUsers,
+  addComment,
+} from '../services/activityService';
 
 export const ACTIVITIES_KEY = ['activities'];
 export const USERS_KEY = ['users'];
 
+export const ACTIVITY_STATS_KEY = ['activities', 'stats'];
+
 export function useActivitiesQuery() {
   return useQuery({ queryKey: ACTIVITIES_KEY, queryFn: getActivities });
+}
+
+export function useActivityStatsQuery() {
+  return useQuery({
+    queryKey: ACTIVITY_STATS_KEY,
+    queryFn: getActivityStats,
+  });
 }
 
 export function useActivityByIdQuery(id) {
@@ -37,6 +57,42 @@ export function useUpdateActivityMutation() {
     },
   });
 }
+export function useUpdateActivityStatusMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }) => updateActivityStatus(id, status),
+
+    onSuccess: (updatedActivity) => {
+      queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
+        old.map((activity) =>
+          activity.id === updatedActivity.id ? updatedActivity : activity
+        )
+      );
+
+      // HU Panel de avance:
+      // vuelve a consultar las estadísticas al cambiar un estatus
+      queryClient.invalidateQueries({
+        queryKey: ACTIVITY_STATS_KEY,
+      });
+    },
+  });
+}
+
+// HU evidencia: mutation dedicada al endpoint PATCH /activities/:id/evidence
+export function useUpdateActivityEvidenceMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, evidenceUrl }) => updateActivityEvidence(id, evidenceUrl),
+    onSuccess: (updatedActivity) => {
+      queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
+        old.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity))
+      );
+
+        
+    },
+  });
+}
 
 export function useDeleteActivityMutation() {
   const queryClient = useQueryClient();
@@ -52,18 +108,33 @@ export function useDeleteActivityMutation() {
 
 export function useAddCommentMutation() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({ activityId, text }) => addComment(activityId, text),
+
     onSuccess: (newComment, { activityId }) => {
+      // Actualiza la lista general de actividades.
       queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
         old.map((activity) => {
           if (activity.id !== activityId) return activity;
+
           return {
             ...activity,
             comments: [...(activity.comments || []), newComment],
           };
         })
       );
+
+      // Actualiza también el detalle de la actividad.
+      // Esto permite mostrar el comentario inmediatamente sin recargar.
+      queryClient.setQueryData(['activity', activityId], (old) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          comments: [...(old.comments || []), newComment],
+        };
+      });
     },
   });
 }

@@ -3,6 +3,7 @@ import { Plus, Calendar, Link2, CircleUserRound, AlertTriangle } from 'lucide-re
 import Navbar from '../components/layout/Navbar';
 import { useActivitiesQuery } from '../hooks/useActivities';
 import ActivityFormModal from '../components/activities/ActivityFormModal';
+import { useAuth } from '../context/useAuth';
 
 const statusStyles = {
   PENDIENTE: 'bg-[#F1F5F9] text-[#64748B]',
@@ -35,6 +36,7 @@ export default function ActivitiesPage() {
   const { data: activities, isLoading, isError } = useActivitiesQuery();
   const [modalMode, setModalMode] = useState(null);
   const [selectedActivity, setSelectedActivity] = useState(null);
+  const { isObserver } = useAuth();
 
   const openCreate = () => {
     setSelectedActivity(null);
@@ -62,14 +64,16 @@ export default function ActivitiesPage() {
               Gestiona las actividades de tu equipo escolar.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={openCreate}
-            className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-semibold px-4 py-2.5 rounded-lg transition"
+          {!isObserver && (
+        <button
+         type="button"
+          onClick={openCreate}
+          className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-semibold px-4 py-2.5 rounded-lg transition"
           >
-            <Plus size={16} />
-            Nueva actividad
+          <Plus size={16} />
+          Nueva actividad
           </button>
+      )}
         </div>
 
         {isLoading && (
@@ -95,7 +99,7 @@ export default function ActivitiesPage() {
             {activities.map((activity) => (
               <button
                 key={activity.id}
-                onClick={() => openEdit(activity)}
+                onClick={() => { if (!isObserver) {openEdit(activity); } }}
                 className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[#F8F9FB] transition"
               >
                 <div className="min-w-0">

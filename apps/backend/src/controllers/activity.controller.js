@@ -8,7 +8,13 @@ const ACTIVITY_INCLUDE = {
     select: { id: true, name: true, email: true, role: true },
   },
   comments: {
-    select: { id: true, text: true, userId: true, createdAt: true },
+    select: {
+      id: true,
+      text: true,
+      userId: true,
+      createdAt: true,
+      user: { select: { id: true, name: true } },
+    },
   },
   subtasks: {
     select: { id: true, text: true, done: true },
@@ -18,6 +24,30 @@ const ACTIVITY_INCLUDE = {
 
 function optionalText(value) {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function isValidEvidenceUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value.trim());
+    return ['http:', 'https:'].includes(url.protocol) && Boolean(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function normalizeStatus(value) {
+  return typeof value === 'string'
+    ? value
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[\s-]+/g, '_')
+      .toUpperCase()
+    : '';
 }
 
 export function getActivitiesController({
@@ -68,6 +98,36 @@ export function getActivityByIdController({
   };
 }
 
+export function deleteActivityController({
+  taskRepository = prisma.task,
+} = {}) {
+  return async function deleteActivity(req, res) {
+    try {
+      const existingActivity = await taskRepository.findUnique({
+        where: { id: req.params.id },
+        select: { id: true },
+      });
+
+      if (!existingActivity) {
+        return res.status(404).json({ message: 'Actividad no encontrada' });
+      }
+
+      await taskRepository.delete({
+        where: { id: req.params.id },
+      });
+
+      return res.status(204).send();
+    } catch (error) {
+      if (error?.code === 'P2025') {
+        return res.status(404).json({ message: 'Actividad no encontrada' });
+      }
+
+      console.error('Error al eliminar actividad:', error);
+      return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  };
+}
+
 export function createActivityController({
   taskRepository = prisma.task,
   userRepository = prisma.user,
@@ -98,14 +158,19 @@ export function createActivityController({
       });
     }
 
+    if (evidenceUrl && !isValidEvidenceUrl(evidenceUrl)) {
+      return res.status(400).json({
+        message: 'El enlace de evidencia debe ser una URL HTTP o HTTPS válida',
+      });
+    }
+
     const dueDate = new Date(dueDateValue);
     if (!dueDateValue || Number.isNaN(dueDate.getTime())) {
       return res.status(400).json({ message: 'La fecha límite no es válida' });
     }
 
     const today = new Date();
-    const [dYear, dMonth, dDay] = dueDateValue.split('-').map(Number);
-    const dueDateOnly = new Date(dYear, dMonth - 1, dDay);
+    const dueDateOnly = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
     const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     if (dueDateOnly < todayOnly) {
       return res.status(400).json({ message: 'La fecha límite no puede ser en el pasado' });
@@ -206,9 +271,7 @@ export function updateActivityController({
       }
 
       if (Object.hasOwn(body, 'status')) {
-        const status = typeof body.status === 'string'
-          ? body.status.trim().toUpperCase()
-          : '';
+        const status = normalizeStatus(body.status);
         if (!VALID_STATUSES.has(status)) {
           return res.status(400).json({
             message: 'El estado debe ser PENDIENTE, EN_PROCESO, EN_REVISION o COMPLETADA',
@@ -233,7 +296,14 @@ export function updateActivityController({
         if (body.evidenceUrl !== null && typeof body.evidenceUrl !== 'string') {
           return res.status(400).json({ message: 'El enlace de evidencia no es válido' });
         }
-        data.evidenceUrl = optionalText(body.evidenceUrl);
+
+        const evidenceUrl = optionalText(body.evidenceUrl);
+        if (evidenceUrl && !isValidEvidenceUrl(evidenceUrl)) {
+          return res.status(400).json({
+            message: 'El enlace de evidencia debe ser una URL HTTP o HTTPS válida',
+          });
+        }
+        data.evidenceUrl = evidenceUrl;
       }
 
       if (Object.hasOwn(body, 'assigneeId')) {
@@ -301,6 +371,107 @@ export function updateActivityController({
       }
 
       console.error('Error al actualizar actividad:', error);
+      return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  };
+}
+
+export function updateActivityStatusController({
+  taskRepository = prisma.task,
+} = {}) {
+  return async function updateActivityStatus(req, res) {
+    const body = req.body;
+
+    if (
+      !body
+      || Array.isArray(body)
+      || Object.keys(body).length !== 1
+      || !Object.hasOwn(body, 'status')
+    ) {
+      return res.status(400).json({
+        message: 'El body debe contener únicamente el campo status',
+      });
+    }
+
+    const status = normalizeStatus(body.status);
+    if (!VALID_STATUSES.has(status)) {
+      return res.status(400).json({
+        message: 'El estado debe ser PENDIENTE, EN_PROCESO, EN_REVISION o COMPLETADA',
+      });
+    }
+
+    try {
+      if (status === TaskStatus.COMPLETADA) {
+        const activity = await taskRepository.findUnique({
+          where: { id: req.params.id },
+          select: { id: true, evidenceUrl: true },
+        });
+
+        if (!activity) {
+          return res.status(404).json({ message: 'Actividad no encontrada' });
+        }
+
+        if (typeof activity.evidenceUrl !== 'string' || !activity.evidenceUrl.trim()) {
+          return res.status(400).json({
+            message: 'No se puede completar una actividad sin evidencia registrada',
+          });
+        }
+      }
+
+      const activity = await taskRepository.update({
+        where: { id: req.params.id },
+        data: { status },
+        include: ACTIVITY_INCLUDE,
+      });
+
+      return res.status(200).json(activity);
+    } catch (error) {
+      if (error?.code === 'P2025') {
+        return res.status(404).json({ message: 'Actividad no encontrada' });
+      }
+
+      console.error('Error al actualizar el estado de la actividad:', error);
+      return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  };
+}
+
+export function updateActivityEvidenceController({
+  taskRepository = prisma.task,
+} = {}) {
+  return async function updateActivityEvidence(req, res) {
+    const body = req.body;
+    if (
+      !body
+      || Array.isArray(body)
+      || Object.keys(body).length !== 1
+      || !Object.hasOwn(body, 'evidenceUrl')
+    ) {
+      return res.status(400).json({
+        message: 'El body debe contener únicamente el campo evidenceUrl',
+      });
+    }
+
+    if (!isValidEvidenceUrl(body.evidenceUrl)) {
+      return res.status(400).json({
+        message: 'El enlace de evidencia debe ser una URL HTTP o HTTPS válida',
+      });
+    }
+
+    try {
+      const activity = await taskRepository.update({
+        where: { id: req.params.id },
+        data: { evidenceUrl: body.evidenceUrl.trim() },
+        include: ACTIVITY_INCLUDE,
+      });
+
+      return res.status(200).json(activity);
+    } catch (error) {
+      if (error?.code === 'P2025') {
+        return res.status(404).json({ message: 'Actividad no encontrada' });
+      }
+
+      console.error('Error al actualizar la evidencia de la actividad:', error);
       return res.status(500).json({ message: 'Error interno del servidor' });
     }
   };

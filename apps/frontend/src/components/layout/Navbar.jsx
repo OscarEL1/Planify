@@ -10,7 +10,8 @@ import {
   MoreVertical,
   User,
 } from 'lucide-react';
-import { getUser, logout } from '../../services/authService';
+import { logout } from "../../services/authService";
+import { useAuth } from "../../context/useAuth";
 
 // HU-17: sidebar de navegación del área autenticada (diseño Figma de Abraham)
 function getInitials(name) {
@@ -49,7 +50,7 @@ const NAV_SECTIONS = [
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = getUser();
+  const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 

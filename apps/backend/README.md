@@ -189,3 +189,136 @@ La respuesta `200` es directamente la actividad actualizada, tal como la espera
 el servicio del frontend. Un ID inexistente retorna `404`, datos inválidos
 retornan `400` y un token ausente, inválido o revocado retorna `401`. Prisma
 actualiza automáticamente `updatedAt` mediante el atributo `@updatedAt`.
+
+## PATCH /activities/:id/status
+
+Actualiza exclusivamente el estado de una actividad. Requiere autenticación
+Bearer y el body debe contener únicamente el campo `status`:
+
+```bash
+curl -X PATCH http://localhost:3000/activities/<activity-uuid>/status \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"EN_PROCESO"}'
+```
+
+Los estados permitidos son `PENDIENTE`, `EN_PROCESO`, `EN_REVISION` y
+`COMPLETADA`. También se aceptan sus etiquetas en español, sin importar
+mayúsculas o acentos. La regla RN-04 impide cambiar a `COMPLETADA` cuando la
+actividad no tiene `evidenceUrl`.
+
+La respuesta exitosa usa código `200` y retorna directamente la actividad
+actualizada. Un estado inválido, campos adicionales o el incumplimiento de RN-04
+retornan `400`; un ID inexistente retorna `404`.
+
+## PATCH /activities/:id/evidence
+
+Actualiza exclusivamente el enlace de evidencia de una actividad. Requiere un
+Bearer token perteneciente a un usuario con rol `MIEMBRO_EQUIPO`, y el body debe
+contener únicamente `evidenceUrl`:
+
+```bash
+curl -X PATCH http://localhost:3000/activities/<activity-uuid>/evidence \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"evidenceUrl":"https://github.com/organizacion/repositorio"}'
+```
+
+El enlace debe ser una URL válida con protocolo HTTP o HTTPS. La respuesta
+exitosa usa código `200` y retorna directamente la actividad actualizada. Una URL
+inválida o campos adicionales retornan `400`; un observador recibe `403` y un ID
+inexistente retorna `404`.
+
+## DELETE /activities/:id
+
+Elimina permanentemente una actividad. Requiere un Bearer token perteneciente a
+un usuario con rol `MIEMBRO_EQUIPO`:
+
+```bash
+curl -X DELETE http://localhost:3000/activities/<activity-uuid> \
+  -H "Authorization: Bearer <jwt>"
+```
+
+La eliminación de comentarios y subtareas relacionadas se realiza mediante las
+restricciones `ON DELETE CASCADE` de la base de datos. `evidenceUrl` forma parte
+de la propia actividad y se elimina junto con ella. Una eliminación exitosa
+retorna `204` sin contenido; un ID inexistente retorna `404` y un observador
+recibe `403`.
+
+## POST /activities/:id/comments
+
+Publica un comentario permanente en una actividad. Requiere un Bearer token de
+un usuario con rol `MIEMBRO_EQUIPO`; el autor se obtiene del JWT y no del body:
+
+```bash
+curl -X POST http://localhost:3000/activities/<activity-uuid>/comments \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Se completó la primera revisión"}'
+```
+
+La respuesta `201` incluye el texto, `createdAt` y el usuario autor con su
+nombre. Un comentario vacío retorna `400`, una actividad inexistente retorna
+`404` y un observador recibe `403`.
+
+## GET /activities/:id/comments
+
+Retorna con código `200` todos los comentarios de la actividad, ordenados por
+`createdAt` ascendente. Cada elemento incluye el texto, fecha de publicación y
+el nombre del autor en `user.name`. Requiere autenticación, pero está disponible
+tanto para miembros como para observadores. No existe endpoint DELETE de
+comentarios: son permanentes por diseño (RN-08).
+
+## GET /activities/stats
+
+Retorna indicadores calculados en cada petición a partir de las actividades
+actuales. Requiere autenticación y está disponible para miembros y observadores:
+
+```bash
+curl http://localhost:3000/activities/stats \
+  -H "Authorization: Bearer <jwt>"
+```
+
+La respuesta usa el siguiente formato:
+
+```json
+{
+  "byStatus": {
+    "PENDIENTE": 2,
+    "EN_PROCESO": 1,
+    "EN_REVISION": 1,
+    "COMPLETADA": 2
+  },
+  "total": 6,
+  "completionPercentage": 33,
+  "progressByAssignee": [
+    {
+      "assigneeId": "user-uuid",
+      "name": "Ada Lovelace",
+      "completed": 1,
+      "total": 2,
+      "completionPercentage": 50
+    }
+  ]
+}
+```
+
+Las actividades sin responsable se incluyen en `total` y `byStatus`, pero no en
+`progressByAssignee`. Los porcentajes se redondean al entero más cercano.
+
+## Control de rol para escrituras
+
+Todas las rutas de negocio bajo `/activities` requieren autenticación. Un
+middleware transversal permite los métodos GET tanto a `MIEMBRO_EQUIPO` como a
+`OBSERVADOR`, pero restringe POST, PATCH y DELETE a `MIEMBRO_EQUIPO`. Un intento
+de escritura sin el rol requerido retorna `403`:
+
+```json
+{
+  "message": "Solo los miembros del equipo pueden realizar acciones de escritura"
+}
+```
+
+Los endpoints POST de `/auth` no forman parte de esta restricción: login,
+registro y logout deben permanecer disponibles para completar el ciclo de
+autenticación. El token emitido por login incluye el campo `role` en su payload.

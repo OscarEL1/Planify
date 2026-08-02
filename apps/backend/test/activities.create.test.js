@@ -51,6 +51,11 @@ const token = jwt.sign(
   JWT_SECRET,
   { expiresIn: '24h', jwtid: randomUUID() },
 );
+const observerToken = jwt.sign(
+  { sub: 'observer-1', name: 'Observer', email: 'observer@planify.test', role: 'OBSERVADOR' },
+  JWT_SECRET,
+  { expiresIn: '24h', jwtid: randomUUID() },
+);
 
 before(async () => {
   const app = createApp({
@@ -92,7 +97,7 @@ describe('POST /activities', () => {
     description: 'Preparar las diapositivas del proyecto',
     assigneeId: teamMember.id,
     priority: 'alta',
-    dueDate: '2026-07-30T18:00:00.000Z',
+    dueDate: '2026-12-30T18:00:00.000Z',
     status: 'COMPLETADA',
     evidenceUrl: 'https://example.com/evidencia',
     comments: [{ text: 'Este comentario debe ignorarse' }],
@@ -107,6 +112,7 @@ describe('POST /activities', () => {
     assert.equal(body.activity.id, 'activity-1');
     assert.equal(body.activity.status, 'PENDIENTE');
     assert.equal(body.activity.priority, 'ALTA');
+    assert.equal(body.activity.evidenceUrl, 'https://example.com/evidencia');
     assert.deepEqual(body.activity.assignee, teamMember);
     assert.deepEqual(body.activity.comments, []);
     assert.equal(createdData.status, 'PENDIENTE');
@@ -144,6 +150,27 @@ describe('POST /activities', () => {
 
     const dateResponse = await createActivity({ ...validActivity, dueDate: 'not-a-date' });
     assert.equal(dateResponse.status, 400);
+  });
+
+  it('retorna 400 si evidenceUrl no es una URL HTTP o HTTPS válida', async () => {
+    const response = await createActivity({
+      ...validActivity,
+      evidenceUrl: 'github.com/planify/evidencia',
+    });
+
+    assert.equal(response.status, 400);
+    assert.deepEqual(await response.json(), {
+      message: 'El enlace de evidencia debe ser una URL HTTP o HTTPS válida',
+    });
+  });
+
+  it('retorna 403 si un observador intenta crear una actividad', async () => {
+    const response = await createActivity(validActivity, observerToken);
+
+    assert.equal(response.status, 403);
+    assert.deepEqual(await response.json(), {
+      message: 'Solo los miembros del equipo pueden realizar acciones de escritura',
+    });
   });
 
   it('retorna 401 si falta el token JWT', async () => {
