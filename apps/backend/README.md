@@ -268,3 +268,40 @@ Retorna con código `200` todos los comentarios de la actividad, ordenados por
 el nombre del autor en `user.name`. Requiere autenticación, pero está disponible
 tanto para miembros como para observadores. No existe endpoint DELETE de
 comentarios: son permanentes por diseño (RN-08).
+
+## GET /activities/stats
+
+Retorna indicadores calculados en cada petición a partir de las actividades
+actuales. Requiere autenticación y está disponible para miembros y observadores:
+
+```bash
+curl http://localhost:3000/activities/stats \
+  -H "Authorization: Bearer <jwt>"
+```
+
+La respuesta usa el siguiente formato:
+
+```json
+{
+  "byStatus": {
+    "PENDIENTE": 2,
+    "EN_PROCESO": 1,
+    "EN_REVISION": 1,
+    "COMPLETADA": 2
+  },
+  "total": 6,
+  "completionPercentage": 33,
+  "progressByAssignee": [
+    {
+      "assigneeId": "user-uuid",
+      "name": "Ada Lovelace",
+      "completed": 1,
+      "total": 2,
+      "completionPercentage": 50
+    }
+  ]
+}
+```
+
+Las actividades sin responsable se incluyen en `total` y `byStatus`, pero no en
+`progressByAssignee`. Los porcentajes se redondean al entero más cercano.
