@@ -33,6 +33,7 @@ export default function Navbar() {
   const menuRef = useRef(null);
 
   const ROLE_LABELS = {
+    ADMIN: t('admin'),
     MIEMBRO_EQUIPO: t('member'),
     OBSERVADOR: t('observer'),
   };

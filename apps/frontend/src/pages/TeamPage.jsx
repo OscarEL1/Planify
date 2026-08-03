@@ -197,26 +197,24 @@ export default function TeamPage() {
                 const isCurrentUser = u.id === currentUser?.id;
                 return (
                   <div key={u.id} className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-5 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 transition">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                          style={{ backgroundColor: getAvatarColor(u.name) }}
-                        >
-                          {getInitials(u.name)}
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-semibold text-[#1D2433] dark:text-white">{u.name}</h3>
-                          <p className="text-xs text-[#64748B] dark:text-[#9CA3AF]">{u.email}</p>
-                        </div>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div
+                        className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                        style={{ backgroundColor: getAvatarColor(u.name) }}
+                      >
+                        {getInitials(u.name)}
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-sm font-semibold text-[#1D2433] dark:text-white truncate">{u.name}</h3>
+                        <p className="text-xs text-[#64748B] dark:text-[#9CA3AF] truncate">{u.email}</p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         {isAdmin && !isCurrentUser && (
                           <div className="relative">
                             <button
                               type="button"
                               onClick={() => setRoleDropdownOpen(roleDropdownOpen === u.id ? null : u.id)}
-                              className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full hover:opacity-80 transition cursor-pointer"
+                              className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full hover:opacity-80 transition cursor-pointer whitespace-nowrap"
                               style={{ backgroundColor: roleStyle.bg, color: roleStyle.color }}
                             >
                               <RoleIcon size={12} />
@@ -241,7 +239,7 @@ export default function TeamPage() {
                         )}
                         {!isAdmin && (
                           <span
-                            className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+                            className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap"
                             style={{ backgroundColor: roleStyle.bg, color: roleStyle.color }}
                           >
                             <RoleIcon size={12} />
