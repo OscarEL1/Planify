@@ -169,8 +169,7 @@ export default function ActivityDetailPage() {
   if (isLoading) {
     return (
       <div
-        className="flex min-h-screen w-full"
-        style={{ backgroundColor: "#F9FAFB" }}
+        className="flex min-h-screen w-full bg-[#F9FAFB] dark:bg-[#111827] transition-colors"
       >
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
@@ -183,12 +182,11 @@ export default function ActivityDetailPage() {
   if (isError || !activity) {
     return (
       <div
-        className="flex min-h-screen w-full"
-        style={{ backgroundColor: "#F9FAFB" }}
+        className="flex min-h-screen w-full bg-[#F9FAFB] dark:bg-[#111827] transition-colors"
       >
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
-          <p className="text-[#64748B]">Actividad no encontrada.</p>
+          <p className="text-[#64748B] dark:text-[#9CA3AF]">Actividad no encontrada.</p>
         </main>
       </div>
     );
@@ -196,8 +194,7 @@ export default function ActivityDetailPage() {
 
   return (
     <div
-      className="flex min-h-screen w-full"
-      style={{ backgroundColor: "#F9FAFB" }}
+      className="flex min-h-screen w-full bg-[#F9FAFB] dark:bg-[#111827] transition-colors"
     >
       <Navbar />
 
@@ -208,13 +205,13 @@ export default function ActivityDetailPage() {
             <button
               type="button"
               onClick={() => navigate("/kanban")}
-              className="flex items-center gap-1 text-sm text-[#64748B] hover:text-[#1D2433] transition"
+              className="flex items-center gap-1 text-sm text-[#64748B] dark:text-[#9CA3AF] hover:text-[#1D2433] transition"
             >
               <ArrowLeft size={16} />
               Tablero
             </button>
-            <span className="text-[#A0AEC0]">/</span>
-            <span className="text-sm font-medium text-[#1D2433]">
+            <span className="text-[#A0AEC0] dark:text-[#6B7280]">/</span>
+            <span className="text-sm font-medium text-[#1D2433] dark:text-white">
               Detalle de actividad
             </span>
           </div>
@@ -224,7 +221,7 @@ export default function ActivityDetailPage() {
                 <button
                   type="button"
                   onClick={() => setShowEditModal(true)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E4E7EC] text-sm font-medium text-[#1D2433] hover:bg-[#F8F9FB] transition"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E4E7EC] dark:border-[#374151] text-sm font-medium text-[#1D2433] dark:text-white hover:bg-[#F8F9FB] dark:hover:bg-[#374151] transition"
                 >
                   <Edit2 size={14} />
                   Editar
@@ -253,11 +250,11 @@ export default function ActivityDetailPage() {
           <div className="flex-1 min-w-0">
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
-                <MessageSquare size={16} className="text-[#1D2433]" />
-                <h2 className="text-sm font-semibold text-[#1D2433]">
+                <MessageSquare size={16} className="text-[#1D2433] dark:text-white" />
+                <h2 className="text-sm font-semibold text-[#1D2433] dark:text-white">
                   Comentarios
                 </h2>
-                <span className="text-xs text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
+                <span className="text-xs text-[#64748B] dark:text-[#9CA3AF] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
                   {activity.comments?.length || 0}
                 </span>
               </div>
@@ -278,18 +275,18 @@ export default function ActivityDetailPage() {
                         {getInitials(comment.user?.name)}
                       </div>
 
-                      <div className="flex-1 bg-[#F8F9FB] rounded-lg px-4 py-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-semibold text-[#1D2433]">
-                            {comment.user?.name || "Usuario"}
-                          </span>
+                        <div className="flex-1 bg-[#F8F9FB] dark:bg-[#374151] rounded-lg px-4 py-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-[#1D2433] dark:text-white">
+                              {comment.user?.name || "Usuario"}
+                            </span>
 
-                          <span className="text-xs text-[#A0AEC0]">
+                            <span className="text-xs text-[#A0AEC0] dark:text-[#6B7280]">
                             {formatTime(comment.createdAt)}
                           </span>
                         </div>
 
-                        <p className="text-sm text-[#1D2433]">
+                          <p className="text-sm text-[#1D2433] dark:text-white">
                           {comment.text}
                         </p>
                       </div>
@@ -320,7 +317,7 @@ export default function ActivityDetailPage() {
                             ? "Publicando comentario..."
                             : "Escribe un comentario y presiona Enter..."
                         }
-                        className="w-full bg-white border border-[#E4E7EC] rounded-lg px-4 py-3 text-sm text-[#1D2433] placeholder-[#A0AEC0] outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-60"
+                        className="w-full bg-white dark:bg-[#374151] border border-[#E4E7EC] dark:border-[#4B5563] rounded-lg px-4 py-3 text-sm text-[#1D2433] dark:text-white placeholder-[#A0AEC0] dark:placeholder-[#6B7280] outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent disabled:opacity-60"
                       />
                     </div>
                   </div>
@@ -332,13 +329,13 @@ export default function ActivityDetailPage() {
           {/* Right sidebar */}
           <div className="w-72 flex-shrink-0">
             {/* Información */}
-            <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5 mb-4">
-              <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-4">
+            <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-5 mb-4">
+              <h3 className="text-xs font-semibold text-[#64748B] dark:text-[#9CA3AF] uppercase tracking-wide mb-4">
                 Información
               </h3>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Estado</span>
+                  <span className="text-sm text-[#64748B] dark:text-[#9CA3AF]">Estado</span>
                   <span
                     className="flex items-center gap-1.5 text-sm"
                     style={{ color: status.color }}
@@ -351,7 +348,7 @@ export default function ActivityDetailPage() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Prioridad</span>
+                  <span className="text-sm text-[#64748B] dark:text-[#9CA3AF]">Prioridad</span>
                   <span
                     className="text-xs font-medium px-2 py-0.5 rounded-full"
                     style={{
@@ -363,7 +360,7 @@ export default function ActivityDetailPage() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Responsable</span>
+                  <span className="text-sm text-[#64748B] dark:text-[#9CA3AF]">Responsable</span>
                   {activity.assignee ? (
                     <div className="flex items-center gap-1.5">
                       <div
@@ -376,19 +373,19 @@ export default function ActivityDetailPage() {
                       >
                         {getInitials(activity.assignee.name)}
                       </div>
-                      <span className="text-sm text-[#1D2433]">
+                      <span className="text-sm text-[#1D2433] dark:text-white">
                         {activity.assignee.name}
                       </span>
                     </div>
                   ) : (
-                    <span className="text-sm text-[#A0AEC0]">
+                    <span className="text-sm text-[#A0AEC0] dark:text-[#6B7280]">
                       Sin asignar
                     </span>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Fecha límite</span>
-                  <span className="flex items-center gap-1 text-sm text-[#1D2433]">
+                  <span className="text-sm text-[#64748B] dark:text-[#9CA3AF]">Fecha límite</span>
+                  <span className="flex items-center gap-1 text-sm text-[#1D2433] dark:text-white">
                     <Calendar size={12} />
                     {activity.dueDate
                       ? formatDate(activity.dueDate)
@@ -396,13 +393,13 @@ export default function ActivityDetailPage() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Subtareas</span>
-                  <span className="text-sm text-[#1D2433]">
+                  <span className="text-sm text-[#64748B] dark:text-[#9CA3AF]">Subtareas</span>
+                  <span className="text-sm text-[#1D2433] dark:text-white">
                     {completedSubtasks}/{totalSubtasks} completadas
                   </span>
                 </div>
                 {totalSubtasks > 0 && (
-                  <div className="w-full h-1.5 bg-[#E4E7EC] rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-[#E4E7EC] dark:bg-[#4B5563] rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#4F46E5] rounded-full"
                       style={{ width: `${subtaskProgress}%` }}
@@ -413,10 +410,10 @@ export default function ActivityDetailPage() {
             </div>
 
             {/* Subtareas */}
-            <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5 mb-4">
+            <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-5 mb-4">
               <div className="flex items-center gap-2 mb-4">
-                <CheckSquare size={16} className="text-[#1D2433]" />
-                <h3 className="text-sm font-semibold text-[#1D2433]">
+                <CheckSquare size={16} className="text-[#1D2433] dark:text-white" />
+                <h3 className="text-sm font-semibold text-[#1D2433] dark:text-white">
                   Subtareas
                 </h3>
               </div>
@@ -440,7 +437,7 @@ export default function ActivityDetailPage() {
                       }`}
                     />
                     <span
-                      className={`text-sm ${subtask.done ? "line-through text-[#A0AEC0]" : "text-[#1D2433]"}`}
+                      className={`text-sm ${subtask.done ? "line-through text-[#A0AEC0] dark:text-[#6B7280]" : "text-[#1D2433] dark:text-white"}`}
                     >
                       {subtask.text}
                     </span>
@@ -451,10 +448,10 @@ export default function ActivityDetailPage() {
 
             {/* Evidencia */}
             {activity.evidenceUrl && (
-              <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
+              <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <Link2 size={16} className="text-[#1D2433]" />
-                  <h3 className="text-sm font-semibold text-[#1D2433]">
+                  <Link2 size={16} className="text-[#1D2433] dark:text-white" />
+                  <h3 className="text-sm font-semibold text-[#1D2433] dark:text-white">
                     Evidencia
                   </h3>
                 </div>

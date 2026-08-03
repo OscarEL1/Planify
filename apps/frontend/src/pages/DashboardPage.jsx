@@ -165,62 +165,61 @@ export default function DashboardPage() {
 
   return (
     <div
-      className="flex min-h-screen w-full"
-      style={{ backgroundColor: "#F9FAFB" }}
+      className="flex min-h-screen w-full bg-[#F9FAFB] dark:bg-[#111827] transition-colors"
     >
       <Navbar />
 
       <main className="flex-1 px-8 py-10">
-        <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-8">
+        <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] dark:text-white mb-8">
           Progreso del equipo
         </h1>
 
         {/* 4 tarjetas principales */}
         <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
+              <p className="text-xs font-semibold text-[#64748B] dark:text-[#9CA3AF] uppercase tracking-wide">
                 Total de actividades
               </p>
               <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center">
                 <BarChart3 size={16} className="text-[#4F46E5]" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-[#1D2433]">{total}</p>
-            <p className="text-xs text-[#64748B] mt-1">en todos los estados</p>
+            <p className="text-3xl font-bold text-[#1D2433] dark:text-white">{total}</p>
+            <p className="text-xs text-[#64748B] dark:text-[#9CA3AF] mt-1">en todos los estados</p>
           </div>
 
-          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
+              <p className="text-xs font-semibold text-[#64748B] dark:text-[#9CA3AF] uppercase tracking-wide">
                 Completadas
               </p>
               <div className="w-8 h-8 rounded-lg bg-[#DCFCE7] flex items-center justify-center">
                 <CheckCircle2 size={16} className="text-[#22C55E]" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-[#1D2433]">{completed}</p>
-            <p className="text-xs text-[#64748B] mt-1">
+            <p className="text-3xl font-bold text-[#1D2433] dark:text-white">{completed}</p>
+            <p className="text-xs text-[#64748B] dark:text-[#9CA3AF] mt-1">
               de {total} actividades
             </p>
           </div>
 
-          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
+              <p className="text-xs font-semibold text-[#64748B] dark:text-[#9CA3AF] uppercase tracking-wide">
                 En proceso
               </p>
               <div className="w-8 h-8 rounded-lg bg-[#DBEAFE] flex items-center justify-center">
                 <Clock size={16} className="text-[#3B82F6]" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-[#1D2433]">{inProgress}</p>
-            <p className="text-xs text-[#64748B] mt-1">actualmente en curso</p>
+            <p className="text-3xl font-bold text-[#1D2433] dark:text-white">{inProgress}</p>
+            <p className="text-xs text-[#64748B] dark:text-[#9CA3AF] mt-1">actualmente en curso</p>
           </div>
 
-          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
+              <p className="text-xs font-semibold text-[#64748B] dark:text-[#9CA3AF] uppercase tracking-wide">
                 Tasa de finalización
               </p>
               <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center">
@@ -254,10 +253,10 @@ export default function DashboardPage() {
                 </span>
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#1D2433]">
+                <p className="text-2xl font-bold text-[#1D2433] dark:text-white">
                   {progressPercent}%
                 </p>
-                <p className="text-xs text-[#64748B]">
+                <p className="text-xs text-[#64748B] dark:text-[#9CA3AF]">
                   de todas las actividades
                 </p>
               </div>
@@ -268,8 +267,8 @@ export default function DashboardPage() {
         {/* Gráfico dona + Progreso por integrante */}
         <div className="grid grid-cols-2 gap-6 mb-8">
           {/* Actividades por estado */}
-          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-6">
-            <h2 className="text-sm font-semibold text-[#1D2433] mb-6">
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-6">
+            <h2 className="text-sm font-semibold text-[#1D2433] dark:text-white mb-6">
               Actividades por estado
             </h2>
             <div className="flex items-center justify-center gap-8">
@@ -281,13 +280,13 @@ export default function DashboardPage() {
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: d.color }}
                     />
-                    <span className="text-sm text-[#1D2433] w-24">
+                    <span className="text-sm text-[#1D2433] dark:text-white w-24">
                       {d.label}
                     </span>
-                    <span className="text-sm font-semibold text-[#1D2433] w-6 text-right">
+                    <span className="text-sm font-semibold text-[#1D2433] dark:text-white w-6 text-right">
                       {d.value}
                     </span>
-                    <span className="text-xs text-[#64748B] w-10 text-right">
+                    <span className="text-xs text-[#64748B] dark:text-[#9CA3AF] w-10 text-right">
                       {total > 0 ? Math.round((d.value / total) * 100) : 0}%
                     </span>
                   </div>
@@ -297,13 +296,13 @@ export default function DashboardPage() {
           </div>
 
           {/* Progreso por integrante */}
-          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-6">
-            <h2 className="text-sm font-semibold text-[#1D2433] mb-6">
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-6">
+            <h2 className="text-sm font-semibold text-[#1D2433] dark:text-white mb-6">
               Progreso por integrante
             </h2>
             <div className="flex flex-col gap-4">
               {memberProgress.length === 0 && (
-                <p className="text-sm text-[#64748B]">
+                <p className="text-sm text-[#64748B] dark:text-[#9CA3AF]">
                   No hay actividades asignadas.
                 </p>
               )}
@@ -317,16 +316,16 @@ export default function DashboardPage() {
                       >
                         {getInitials(member.name)}
                       </div>
-                      <span className="text-sm font-medium text-[#1D2433]">
+                      <span className="text-sm font-medium text-[#1D2433] dark:text-white">
                         {member.name}
                       </span>
                     </div>
-                    <span className="text-sm font-bold text-[#1D2433]">
+                    <span className="text-sm font-bold text-[#1D2433] dark:text-white">
                       {member.percent}%
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-[#E4E7EC] rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-[#E4E7EC] dark:bg-[#4B5563] rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
@@ -335,7 +334,7 @@ export default function DashboardPage() {
                         }}
                       />
                     </div>
-                    <span className="text-xs text-[#64748B] w-28 text-right">
+                    <span className="text-xs text-[#64748B] dark:text-[#9CA3AF] w-28 text-right">
                       {member.completed} de {member.total} completadas
                     </span>
                   </div>
@@ -347,11 +346,11 @@ export default function DashboardPage() {
 
         {/* Actividades recientes */}
         {recentActivities.length > 0 && (
-          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-6">
-            <h2 className="text-sm font-semibold text-[#1D2433] mb-4">
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-6">
+            <h2 className="text-sm font-semibold text-[#1D2433] dark:text-white mb-4">
               Actividades recientes
             </h2>
-            <div className="divide-y divide-[#E4E7EC]">
+            <div className="divide-y divide-[#E4E7EC] dark:divide-[#374151]">
               {recentActivities.map((activity) => {
                 const priority =
                   priorityStyles[activity.priority] || priorityStyles.MEDIA;
@@ -360,7 +359,7 @@ export default function DashboardPage() {
                     key={activity.id}
                     type="button"
                     onClick={() => navigate(`/activities/${activity.id}`)}
-                    className="w-full flex items-center justify-between py-3 text-left hover:bg-[#F8F9FB] transition"
+                    className="w-full flex items-center justify-between py-3 text-left hover:bg-[#F8F9FB] dark:hover:bg-[#374151] transition"
                   >
                     <div className="flex items-center gap-3">
                       {activity.assignee && (
@@ -376,10 +375,10 @@ export default function DashboardPage() {
                         </div>
                       )}
                       <div>
-                        <p className="text-sm font-medium text-[#1D2433]">
+                        <p className="text-sm font-medium text-[#1D2433] dark:text-white">
                           {activity.title}
                         </p>
-                        <p className="text-xs text-[#64748B]">
+                        <p className="text-xs text-[#64748B] dark:text-[#9CA3AF]">
                           {activity.assignee?.name || "Sin asignar"}
                           {activity.dueDate &&
                             ` · Vence el ${formatDate(activity.dueDate)}`}
