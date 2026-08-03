@@ -8,8 +8,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 2 roles con permisos distintos basados en el documento
+// 3 roles con permisos distintos basados en el documento
 enum Role {
+  ADMIN
   MIEMBRO_EQUIPO
   OBSERVADOR
 }

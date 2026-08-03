@@ -51,6 +51,21 @@ export async function getUsers() {
   return response.data;
 }
 
+export async function deleteUser(id) {
+  await api.delete(`/users/${id}`);
+  return id;
+}
+
+export async function inviteUser({ name, email, role }) {
+  const response = await api.post('/users', { name, email, role });
+  return response.data.user;
+}
+
+export async function updateUserRole(id, role) {
+  const response = await api.patch(`/users/${id}/role`, { role });
+  return response.data;
+}
+
 export async function addComment(activityId, text) {
   const response = await api.post(`${RESOURCE}/${activityId}/comments`, { text });
   return response.data;
