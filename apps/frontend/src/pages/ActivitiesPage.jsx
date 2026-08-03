@@ -1,9 +1,23 @@
-import { useState } from 'react';
-import { Plus, Calendar, Link2, CircleUserRound, AlertTriangle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, Calendar, Link2, CircleUserRound, AlertTriangle, Filter, ChevronDown } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
-import { useActivitiesQuery } from '../hooks/useActivities';
+import { useActivitiesQuery, useUsersQuery } from '../hooks/useActivities';
 import ActivityFormModal from '../components/activities/ActivityFormModal';
 import { useAuth } from '../context/useAuth';
+
+const avatarColors = ['#4F46E5', '#0891B2', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777'];
+
+function getInitials(name) {
+  if (!name) return '?';
+  return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function getAvatarColor(name) {
+  if (!name) return avatarColors[0];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return avatarColors[Math.abs(hash) % avatarColors.length];
+}
 
 const statusStyles = {
   PENDIENTE: 'bg-[#F1F5F9] text-[#64748B]',
@@ -34,9 +48,27 @@ function isOverdue(dueDate, status) {
 
 export default function ActivitiesPage() {
   const { data: activities, isLoading, isError } = useActivitiesQuery();
+  const { data: users } = useUsersQuery();
   const [modalMode, setModalMode] = useState(null);
   const [selectedActivity, setSelectedActivity] = useState(null);
   const { isObserver } = useAuth();
+  const [filterAssignee, setFilterAssignee] = useState('all');
+  const [filterPriority, setFilterPriority] = useState('all');
+  const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
+  const [priorityDropdownOpen, setPriorityDropdownOpen] = useState(false);
+
+  const filteredActivities = useMemo(() => {
+    if (!activities) return [];
+    return activities.filter((a) => {
+      if (filterAssignee !== 'all' && a.assigneeId !== filterAssignee) return false;
+      if (filterPriority !== 'all' && a.priority !== filterPriority) return false;
+      return true;
+    });
+  }, [activities, filterAssignee, filterPriority]);
+
+  const selectedAssigneeName = filterAssignee === 'all'
+    ? 'Todos'
+    : users?.find((u) => u.id === filterAssignee)?.name || 'Todos';
 
   const openCreate = () => {
     setSelectedActivity(null);
@@ -76,6 +108,86 @@ export default function ActivitiesPage() {
       )}
         </div>
 
+        {/* Filtros */}
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-2 text-sm text-[#64748B] dark:text-[#9CA3AF]">
+            <Filter size={16} />
+            Filtrar por:
+          </div>
+
+          {/* Filtro Responsable */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => { setAssigneeDropdownOpen(!assigneeDropdownOpen); setPriorityDropdownOpen(false); }}
+              className="flex items-center gap-2 bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-lg px-3 py-2 text-sm text-[#1D2433] dark:text-white hover:bg-[#F8F9FB] dark:hover:bg-[#374151] transition"
+            >
+              Responsable: {selectedAssigneeName}
+              <ChevronDown size={14} className="text-[#A0AEC0]" />
+            </button>
+            {assigneeDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-56 bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-lg shadow-lg py-1">
+                <button
+                  type="button"
+                  onClick={() => { setFilterAssignee('all'); setAssigneeDropdownOpen(false); }}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] dark:hover:bg-[#374151] ${filterAssignee === 'all' ? 'bg-[#EEF2FF] dark:bg-[#312E81] text-[#4F46E5] dark:text-[#818CF8]' : 'text-[#1D2433] dark:text-white'}`}
+                >
+                  Todos
+                </button>
+                {users?.map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => { setFilterAssignee(u.id); setAssigneeDropdownOpen(false); }}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#F8F9FB] dark:hover:bg-[#374151] ${filterAssignee === u.id ? 'bg-[#EEF2FF] dark:bg-[#312E81] text-[#4F46E5] dark:text-[#818CF8]' : 'text-[#1D2433] dark:text-white'}`}
+                  >
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
+                      style={{ backgroundColor: getAvatarColor(u.name) }}
+                    >
+                      {getInitials(u.name)}
+                    </div>
+                    {u.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Filtro Prioridad */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => { setPriorityDropdownOpen(!priorityDropdownOpen); setAssigneeDropdownOpen(false); }}
+              className="flex items-center gap-2 bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-lg px-3 py-2 text-sm text-[#1D2433] dark:text-white hover:bg-[#F8F9FB] dark:hover:bg-[#374151] transition"
+            >
+              Prioridad: {filterPriority === 'all' ? 'Todas' : filterPriority === 'ALTA' ? 'Alta' : filterPriority === 'MEDIA' ? 'Media' : 'Baja'}
+              <ChevronDown size={14} className="text-[#A0AEC0]" />
+            </button>
+            {priorityDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-40 bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-lg shadow-lg py-1">
+                <button
+                  type="button"
+                  onClick={() => { setFilterPriority('all'); setPriorityDropdownOpen(false); }}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] dark:hover:bg-[#374151] ${filterPriority === 'all' ? 'bg-[#EEF2FF] dark:bg-[#312E81] text-[#4F46E5] dark:text-[#818CF8]' : 'text-[#1D2433] dark:text-white'}`}
+                >
+                  Todas
+                </button>
+                {['ALTA', 'MEDIA', 'BAJA'].map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => { setFilterPriority(p); setPriorityDropdownOpen(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] dark:hover:bg-[#374151] ${filterPriority === p ? 'bg-[#EEF2FF] dark:bg-[#312E81] text-[#4F46E5] dark:text-[#818CF8]' : 'text-[#1D2433] dark:text-white'}`}
+                  >
+                    {p === 'ALTA' ? 'Alta' : p === 'MEDIA' ? 'Media' : 'Baja'}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
         {isLoading && (
           <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-8 text-center text-sm text-[#64748B] dark:text-[#9CA3AF]">
             Cargando actividades...
@@ -94,9 +206,15 @@ export default function ActivitiesPage() {
           </div>
         )}
 
-        {!isLoading && !isError && activities?.length > 0 && (
+        {!isLoading && !isError && activities?.length > 0 && filteredActivities.length === 0 && (
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-8 text-center text-sm text-[#64748B] dark:text-[#9CA3AF]">
+            No hay actividades que coincidan con los filtros seleccionados.
+          </div>
+        )}
+
+        {!isLoading && !isError && filteredActivities.length > 0 && (
           <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl divide-y divide-[#E4E7EC] dark:divide-[#374151]">
-            {activities.map((activity) => (
+            {filteredActivities.map((activity) => (
               <button
                 key={activity.id}
                 onClick={() => { if (!isObserver) {openEdit(activity); } }}

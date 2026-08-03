@@ -55,7 +55,18 @@ export function getActivitiesController({
 } = {}) {
   return async function getActivities(req, res) {
     try {
+      const { assigneeId, priority } = req.query;
+
+      const where = {};
+      if (assigneeId && assigneeId !== 'all') {
+        where.assigneeId = assigneeId;
+      }
+      if (priority && priority !== 'all' && VALID_PRIORITIES.has(priority)) {
+        where.priority = priority;
+      }
+
       const activities = await taskRepository.findMany({
+        where,
         include: ACTIVITY_INCLUDE,
         orderBy: {
           createdAt: 'desc',
