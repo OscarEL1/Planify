@@ -9,8 +9,7 @@
   ],
   "scripts": {
     "dev:frontend": "npm run dev --workspace=apps/frontend",
-    "dev:backend": "npm run dev --workspace=apps/backend",
-    "prepare": "husky"
+    "dev:backend": "npm run dev --workspace=apps/backend"
   },
   "dependencies": {
     "@prisma/client": "^7.8.0"
