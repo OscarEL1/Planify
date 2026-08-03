@@ -213,12 +213,8 @@ export default function KanbanBoard({ activities: filteredActivities, isObserver
     </div>
   );
 
-  if (isObserver) {
-    return boardContent;
-  }
-
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
+    <DragDropContext onDragEnd={isObserver ? () => {} : handleDragEnd}>
       {boardContent}
     </DragDropContext>
   );
