@@ -9,6 +9,9 @@ import {
   updateActivityEvidence,
   deleteActivity,
   getUsers,
+  deleteUser,
+  inviteUser,
+  updateUserRole,
   addComment,
 } from '../services/activityService';
 
@@ -135,6 +138,36 @@ export function useAddCommentMutation() {
           comments: [...(old.comments || []), newComment],
         };
       });
+    },
+  });
+}
+
+export function useDeleteUserMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: USERS_KEY });
+    },
+  });
+}
+
+export function useInviteUserMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: inviteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: USERS_KEY });
+    },
+  });
+}
+
+export function useUpdateUserRoleMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, role }) => updateUserRole(id, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: USERS_KEY });
     },
   });
 }

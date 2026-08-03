@@ -2,6 +2,10 @@ import api from './api';
 
 // HU-01: login guarda token y user (para Navbar/DashboardPage sin ir a la BD)
 export async function login({ email, password }) {
+  // Limpiar datos de sesion anterior antes del login
+  localStorage.removeItem('planify_token');
+  localStorage.removeItem('user');
+
   const response = await api.post('/auth/login', { email, password });
   const { token, user } = response.data;
 

@@ -41,6 +41,9 @@ export default function RegisterForm() {
         email: data.email,
         password: data.password,
       });
+      localStorage.removeItem('planify_token');
+      localStorage.removeItem('user');
+      window.dispatchEvent(new Event('planify-auth-changed'));
       navigate('/login');
     } catch (error) {
       if (error.response) {

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { login } from '../../services/authService';
 
 const loginSchema = z.object({
@@ -13,6 +14,7 @@ const loginSchema = z.object({
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
@@ -29,6 +31,8 @@ export default function LoginForm() {
     setIsSubmitting(true);
     try {
       await login(data);
+      queryClient.clear();
+      window.dispatchEvent(new Event('planify-auth-changed'));
       navigate('/dashboard');
     } catch (error) {
       if (error.response) {
