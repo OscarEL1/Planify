@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const SettingsContext = createContext(null);
 
@@ -24,29 +24,26 @@ function loadSettings() {
   return { ...DEFAULTS };
 }
 
-function saveSettings(settings) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
 }
 
 export function SettingsProvider({ children }) {
   const [settings, setSettings] = useState(loadSettings);
 
   useEffect(() => {
-    saveSettings(settings);
+    applyTheme(settings.theme);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (settings.theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }, [settings.theme]);
-
-  const setTheme = (theme) => setSettings((s) => ({ ...s, theme }));
-  const setLanguage = (language) => setSettings((s) => ({ ...s, language }));
-  const setNotifications = (notifications) => setSettings((s) => ({ ...s, notifications }));
+  const setTheme = useCallback((theme) => setSettings((s) => ({ ...s, theme })), []);
+  const setLanguage = useCallback((language) => setSettings((s) => ({ ...s, language })), []);
+  const setNotifications = useCallback((notifications) => setSettings((s) => ({ ...s, notifications })), []);
 
   const value = useMemo(() => ({
     ...settings,

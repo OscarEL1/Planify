@@ -20,6 +20,11 @@ export default function SettingsPage() {
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
 
+  // Pending state — only applied on save
+  const [pendingTheme, setPendingTheme] = useState(theme);
+  const [pendingLanguage, setPendingLanguage] = useState(language);
+  const [pendingNotifications, setPendingNotifications] = useState(notifications);
+
   const handleSave = () => {
     if (activeSection === 'account') {
       if (user) {
@@ -27,6 +32,13 @@ export default function SettingsPage() {
         localStorage.setItem('user', JSON.stringify(updatedUser));
         window.dispatchEvent(new Event('planify-auth-changed'));
       }
+    }
+    if (activeSection === 'display') {
+      setTheme(pendingTheme);
+      setLanguage(pendingLanguage);
+    }
+    if (activeSection === 'notifications') {
+      setNotifications(pendingNotifications);
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -151,14 +163,14 @@ export default function SettingsPage() {
                   <ToggleRow
                     label={t('emailNotifications')}
                     description={t('emailNotificationsDesc')}
-                    checked={notifications.email}
-                    onChange={(v) => setNotifications({ ...notifications, email: v })}
+                    checked={pendingNotifications.email}
+                    onChange={(v) => setPendingNotifications({ ...pendingNotifications, email: v })}
                   />
                   <ToggleRow
                     label={t('pushNotifications')}
                     description={t('pushNotificationsDesc')}
-                    checked={notifications.push}
-                    onChange={(v) => setNotifications({ ...notifications, push: v })}
+                    checked={pendingNotifications.push}
+                    onChange={(v) => setPendingNotifications({ ...pendingNotifications, push: v })}
                   />
                   <div className="border-t border-[#F1F5F9] dark:border-[#374151] pt-4 mt-2">
                     <p className="text-xs font-semibold text-[#64748B] dark:text-[#9CA3AF] uppercase tracking-wide mb-3">{t('events')}</p>
@@ -166,20 +178,20 @@ export default function SettingsPage() {
                   <ToggleRow
                     label={t('newAssignments')}
                     description={t('newAssignmentsDesc')}
-                    checked={notifications.assignments}
-                    onChange={(v) => setNotifications({ ...notifications, assignments: v })}
+                    checked={pendingNotifications.assignments}
+                    onChange={(v) => setPendingNotifications({ ...pendingNotifications, assignments: v })}
                   />
                   <ToggleRow
                     label={t('newComments')}
                     description={t('newCommentsDesc')}
-                    checked={notifications.comments}
-                    onChange={(v) => setNotifications({ ...notifications, comments: v })}
+                    checked={pendingNotifications.comments}
+                    onChange={(v) => setPendingNotifications({ ...pendingNotifications, comments: v })}
                   />
                   <ToggleRow
                     label={t('deadlines')}
                     description={t('deadlinesDesc')}
-                    checked={notifications.deadlines}
-                    onChange={(v) => setNotifications({ ...notifications, deadlines: v })}
+                    checked={pendingNotifications.deadlines}
+                    onChange={(v) => setPendingNotifications({ ...pendingNotifications, deadlines: v })}
                   />
                 </div>
               </div>
@@ -202,9 +214,9 @@ export default function SettingsPage() {
                         <button
                           key={th.id}
                           type="button"
-                          onClick={() => setTheme(th.id)}
+                          onClick={() => setPendingTheme(th.id)}
                           className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition ${
-                            theme === th.id
+                            pendingTheme === th.id
                               ? 'border-[#4F46E5] dark:border-[#818CF8] bg-[#EEF2FF] dark:bg-[#312E81]'
                               : 'border-[#E4E7EC] dark:border-[#4B5563] hover:border-[#A0AEC0] dark:hover:border-[#6B7280]'
                           }`}
@@ -235,9 +247,9 @@ export default function SettingsPage() {
                         <button
                           key={lang.id}
                           type="button"
-                          onClick={() => setLanguage(lang.id)}
+                          onClick={() => setPendingLanguage(lang.id)}
                           className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition ${
-                            language === lang.id
+                            pendingLanguage === lang.id
                               ? 'border-[#4F46E5] dark:border-[#818CF8] bg-[#EEF2FF] dark:bg-[#312E81]'
                               : 'border-[#E4E7EC] dark:border-[#4B5563] hover:border-[#A0AEC0] dark:hover:border-[#6B7280]'
                           }`}
