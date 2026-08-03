@@ -51,16 +51,16 @@ export default function ActivitiesPage() {
   const closeModal = () => setModalMode(null);
 
   return (
-    <div className="flex min-h-screen w-full" style={{ backgroundColor: '#F9FAFB' }}>
+    <div className="flex min-h-screen w-full bg-[#F9FAFB] dark:bg-[#111827] transition-colors">
       <Navbar />
 
       <main className="flex-1 px-8 py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-1">
+            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] dark:text-white mb-1">
               Actividades
             </h1>
-            <p className="text-sm text-[#64748B]">
+            <p className="text-sm text-[#64748B] dark:text-[#9CA3AF]">
               Gestiona las actividades de tu equipo escolar.
             </p>
           </div>
@@ -77,7 +77,7 @@ export default function ActivitiesPage() {
         </div>
 
         {isLoading && (
-          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-8 text-center text-sm text-[#64748B]">
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-8 text-center text-sm text-[#64748B] dark:text-[#9CA3AF]">
             Cargando actividades...
           </div>
         )}
@@ -89,22 +89,22 @@ export default function ActivitiesPage() {
         )}
 
         {!isLoading && !isError && activities?.length === 0 && (
-          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-8 text-center text-sm text-[#64748B]">
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-8 text-center text-sm text-[#64748B] dark:text-[#9CA3AF]">
             Aún no hay actividades. Crea la primera con el botón de arriba.
           </div>
         )}
 
         {!isLoading && !isError && activities?.length > 0 && (
-          <div className="bg-white border border-[#E4E7EC] rounded-2xl divide-y divide-[#E4E7EC]">
+          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl divide-y divide-[#E4E7EC] dark:divide-[#374151]">
             {activities.map((activity) => (
               <button
                 key={activity.id}
                 onClick={() => { if (!isObserver) {openEdit(activity); } }}
-                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[#F8F9FB] transition"
+                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[#F8F9FB] dark:hover:bg-[#374151] transition"
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-[#1D2433] truncate">{activity.title}</p>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-[#64748B]">
+                    <p className="text-sm font-medium text-[#1D2433] dark:text-white truncate">{activity.title}</p>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-[#64748B] dark:text-[#9CA3AF]">
                     {activity.assignee && (
                       <span className="flex items-center gap-1">
                         <CircleUserRound size={12} />
