@@ -5,10 +5,10 @@ import { useUpdateActivityStatusMutation } from '../../hooks/useActivities';
 import { useToast } from '../common/useToast';
 
 const columns = [
-  { id: 'PENDIENTE', title: 'Pendiente', color: '#94A3B8', bgColor: '#F1F5F9', darkBg: '#1E293B' },
-  { id: 'EN_PROCESO', title: 'En proceso', color: '#3B82F6', bgColor: '#EFF6FF', darkBg: '#172554' },
-  { id: 'EN_REVISION', title: 'En revisión', color: '#8B5CF6', bgColor: '#F5F3FF', darkBg: '#2E1065' },
-  { id: 'COMPLETADA', title: 'Completada', color: '#22C55E', bgColor: '#F0FDF4', darkBg: '#052E16' },
+  { id: 'PENDIENTE', title: 'Pendiente', color: '#94A3B8', bgClass: 'bg-[#F1F5F9] dark:bg-[#1E293B]' },
+  { id: 'EN_PROCESO', title: 'En proceso', color: '#3B82F6', bgClass: 'bg-[#EFF6FF] dark:bg-[#172554]' },
+  { id: 'EN_REVISION', title: 'En revisión', color: '#8B5CF6', bgClass: 'bg-[#F5F3FF] dark:bg-[#2E1065]' },
+  { id: 'COMPLETADA', title: 'Completada', color: '#22C55E', bgClass: 'bg-[#F0FDF4] dark:bg-[#052E16]' },
 ];
 
 const priorityStyles = {
@@ -180,10 +180,9 @@ export default function KanbanBoard({ activities: filteredActivities, isObserver
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className={`flex-1 min-h-[200px] rounded-xl p-2 transition-colors ${
+                  className={`flex-1 min-h-[200px] rounded-xl p-2 transition-colors ${column.bgClass} ${
                     snapshot.isDraggingOver ? 'ring-2 ring-[#4F46E5]/30' : ''
                   }`}
-                  style={{ backgroundColor: snapshot.isDraggingOver ? '#EEF2FF' : column.darkBg }}
                 >
                   <div className="flex flex-col gap-2.5">
                     {columnActivities.map((activity, index) => (
