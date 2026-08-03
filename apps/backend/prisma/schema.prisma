@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -7,8 +8,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 2 roles con permisos distintos basados en el documento
+// 3 roles con permisos distintos basados en el documento
 enum Role {
+  ADMIN
   MIEMBRO_EQUIPO
   OBSERVADOR
 }
@@ -58,9 +60,25 @@ model Task {
   
   // Relación con los comentarios
   comments    Comment[]
+
+  // Relación con las subtareas
+  subtasks    Subtask[]
   
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+}
+
+// Modelo para subtareas
+model Subtask {
+  id        String   @id @default(uuid())
+  text      String
+  done      Boolean  @default(false)
+
+  // Relación con la tarea
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }
 
 // Modelo para los comentarios y notas de seguimiento
