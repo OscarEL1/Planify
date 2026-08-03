@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { createApp } from '../src/app.js';
 
 const users = new Map();
