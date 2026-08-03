@@ -27,7 +27,7 @@ function getInitials(name) {
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, isObserver } = useAuth();
   const { t } = useTranslations();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -47,13 +47,13 @@ export default function Navbar() {
         { to: '/activities', label: t('activities'), icon: ListChecks },
       ],
     },
-    {
+    ...(!isObserver ? [{
       title: t('workspace'),
       links: [
         { to: '/team', label: t('team'), icon: Users },
         { to: '/settings', label: t('settings'), icon: Settings },
       ],
-    },
+    }] : []),
   ];
 
   const handleLogout = async () => {
