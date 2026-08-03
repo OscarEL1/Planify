@@ -32,6 +32,7 @@ export default function LoginForm() {
     try {
       await login(data);
       queryClient.clear();
+      window.dispatchEvent(new Event('planify-auth-changed'));
       navigate('/dashboard');
     } catch (error) {
       if (error.response) {
