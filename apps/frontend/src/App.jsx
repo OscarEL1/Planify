@@ -5,9 +5,6 @@ import DashboardPage from './pages/DashboardPage.jsx'
 import ActivitiesPage from './pages/ActivitiesPage.jsx'
 import KanbanPage from './pages/KanbanPage.jsx'
 import ActivityDetailPage from './pages/ActivityDetailPage.jsx'
-import TeamPage from './pages/TeamPage.jsx'
-import SettingsPage from './pages/SettingsPage.jsx'
-import ProfilePage from './pages/ProfilePage.jsx'
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx'
 
 function App() {
@@ -21,9 +18,6 @@ function App() {
         <Route path="/activities" element={<ActivitiesPage />} />
         <Route path="/activities/:id" element={<ActivityDetailPage />} />
         <Route path="/kanban" element={<KanbanPage />} />
-        <Route path="/team" element={<TeamPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

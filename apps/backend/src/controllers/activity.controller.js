@@ -16,10 +16,6 @@ const ACTIVITY_INCLUDE = {
       user: { select: { id: true, name: true } },
     },
   },
-  subtasks: {
-    select: { id: true, text: true, done: true },
-    orderBy: { createdAt: 'asc' },
-  },
 };
 
 function optionalText(value) {
@@ -208,14 +204,6 @@ export function createActivityController({
           dueDate,
           status: TaskStatus.PENDIENTE,
           evidenceUrl,
-          subtasks: {
-            create: Array.isArray(req.body?.subtasks)
-              ? req.body.subtasks.map((st) => ({
-                  text: typeof st.text === 'string' ? st.text.trim() : '',
-                  done: typeof st.done === 'boolean' ? st.done : false,
-                })).filter((st) => st.text)
-              : [],
-          },
         },
         include: ACTIVITY_INCLUDE,
       });
@@ -340,27 +328,8 @@ export function updateActivityController({
         }
       }
 
-      if (Object.keys(data).length === 0 && !Array.isArray(body.subtasks)) {
+      if (Object.keys(data).length === 0) {
         return res.status(400).json({ message: 'No se enviaron campos para actualizar' });
-      }
-
-      // Si se envían subtareas, borrar las existentes y crear las nuevas
-      if (Array.isArray(body.subtasks)) {
-        const subtaskRepository = prisma.subtask;
-        await subtaskRepository.deleteMany({
-          where: { taskId: req.params.id },
-        });
-        if (body.subtasks.length > 0) {
-          await subtaskRepository.createMany({
-            data: body.subtasks
-              .map((st) => ({
-                text: typeof st.text === 'string' ? st.text.trim() : '',
-                done: typeof st.done === 'boolean' ? st.done : false,
-                taskId: req.params.id,
-              }))
-              .filter((st) => st.text),
-          });
-        }
       }
 
       const activity = await taskRepository.update({
