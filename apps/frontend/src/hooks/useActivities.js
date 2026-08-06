@@ -9,9 +9,6 @@ import {
   updateActivityEvidence,
   deleteActivity,
   getUsers,
-  deleteUser,
-  inviteUser,
-  updateUserRole,
   addComment,
 } from '../services/activityService';
 
@@ -73,8 +70,6 @@ export function useUpdateActivityStatusMutation() {
         )
       );
 
-      // HU Panel de avance:
-      // vuelve a consultar las estadísticas al cambiar un estatus
       queryClient.invalidateQueries({
         queryKey: ACTIVITY_STATS_KEY,
       });
@@ -82,7 +77,6 @@ export function useUpdateActivityStatusMutation() {
   });
 }
 
-// HU evidencia: mutation dedicada al endpoint PATCH /activities/:id/evidence
 export function useUpdateActivityEvidenceMutation() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -91,8 +85,6 @@ export function useUpdateActivityEvidenceMutation() {
       queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
         old.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity))
       );
-
-        
     },
   });
 }
@@ -116,7 +108,6 @@ export function useAddCommentMutation() {
     mutationFn: ({ activityId, text }) => addComment(activityId, text),
 
     onSuccess: (newComment, { activityId }) => {
-      // Actualiza la lista general de actividades.
       queryClient.setQueryData(ACTIVITIES_KEY, (old = []) =>
         old.map((activity) => {
           if (activity.id !== activityId) return activity;
@@ -128,8 +119,6 @@ export function useAddCommentMutation() {
         })
       );
 
-      // Actualiza también el detalle de la actividad.
-      // Esto permite mostrar el comentario inmediatamente sin recargar.
       queryClient.setQueryData(['activity', activityId], (old) => {
         if (!old) return old;
 
@@ -138,36 +127,6 @@ export function useAddCommentMutation() {
           comments: [...(old.comments || []), newComment],
         };
       });
-    },
-  });
-}
-
-export function useDeleteUserMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: deleteUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: USERS_KEY });
-    },
-  });
-}
-
-export function useInviteUserMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: inviteUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: USERS_KEY });
-    },
-  });
-}
-
-export function useUpdateUserRoleMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, role }) => updateUserRole(id, role),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: USERS_KEY });
     },
   });
 }
