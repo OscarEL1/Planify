@@ -10,8 +10,6 @@ import {
   Send,
   Trash2,
   CircleUserRound,
-  CheckSquare,
-  Plus,
   ChevronDown,
   Check,
 } from "lucide-react";
@@ -153,8 +151,6 @@ export default function ActivityFormModal({
   const freshActivity = activities?.find((a) => a.id === initialData?.id);
   const comments = freshActivity?.comments || [];
 
-  const [subtasks, setSubtasks] = useState([]);
-  const [newSubtask, setNewSubtask] = useState("");
   const [commentDraft, setCommentDraft] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
@@ -207,7 +203,6 @@ export default function ActivityFormModal({
         status: initialData.status || "PENDIENTE",
         evidenceUrl: initialData.evidenceUrl || "",
       });
-      setSubtasks(initialData.subtasks || []);
     } else {
       reset({
         title: "",
@@ -218,9 +213,7 @@ export default function ActivityFormModal({
         status: "PENDIENTE",
         evidenceUrl: "",
       });
-      setSubtasks([]);
     }
-    setNewSubtask("");
     setCommentDraft("");
   }, [isOpen, mode, initialData, reset]);
 
@@ -232,26 +225,6 @@ export default function ActivityFormModal({
 
   const selectedPriority = watch("priority");
   const selectedStatus = watch("status");
-
-  const completedCount = subtasks.filter((s) => s.done).length;
-  const subtaskProgress = subtasks.length
-    ? Math.round((completedCount / subtasks.length) * 100)
-    : 0;
-
-  const toggleSubtask = (id) => {
-    setSubtasks((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, done: !s.done } : s)),
-    );
-  };
-
-  const addSubtask = () => {
-    if (!newSubtask.trim()) return;
-    setSubtasks((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), text: newSubtask.trim(), done: false },
-    ]);
-    setNewSubtask("");
-  };
 
   const handleSendComment = async () => {
     if (!commentDraft.trim()) return;
@@ -276,7 +249,6 @@ export default function ActivityFormModal({
       priority: formData.priority,
       dueDate: formData.dueDate || null,
       assigneeId: formData.assigneeId || null,
-      subtasks,
     };
 
     try {
@@ -663,71 +635,6 @@ export default function ActivityFormModal({
               {...register("description")}
             />
           </div>
-
-          {/* Subtareas — solo edición. 🔧 campo no confirmado en backend */}
-          {mode === "edit" && (
-            <div className="flex flex-col gap-3 pt-2 border-t border-[#E4E7EC]">
-              <div className="flex items-center gap-2">
-                <CheckSquare size={16} className="text-[#1D2433]" />
-                <span className="text-sm font-semibold text-[#1D2433]">
-                  Subtareas
-                </span>
-                <span className="bg-[#EEF2FF] text-[#4F46E5] text-xs font-semibold px-2 py-0.5 rounded-full">
-                  {completedCount}/{subtasks.length}
-                </span>
-              </div>
-              <div className="w-full h-1.5 bg-[#E4E7EC] rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-[#4F46E5] rounded-full transition-all"
-                  style={{ width: `${subtaskProgress}%` }}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {subtasks.map((s) => (
-                  <label
-                    key={s.id}
-                    className="flex items-center gap-2.5 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={s.done}
-                      onChange={() => toggleSubtask(s.id)}
-                      className="w-4 h-4 rounded accent-[#4F46E5]"
-                    />
-                    <span
-                      className={`text-sm ${s.done ? "line-through text-[#A0AEC0]" : "text-[#1D2433]"}`}
-                    >
-                      {s.text}
-                    </span>
-                  </label>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={newSubtask}
-                  onChange={(e) => setNewSubtask(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addSubtask();
-                    }
-                  }}
-                  placeholder="Añadir subtarea..."
-                  className="flex-1 bg-white border border-dashed border-[#E4E7EC] rounded-lg px-3.5 py-2 text-sm text-[#1D2433] placeholder-[#A0AEC0] outline-none focus:ring-2 focus:ring-[#4F46E5]"
-                />
-                <button
-                  type="button"
-                  onClick={addSubtask}
-                  className="w-8 h-8 rounded-lg bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center hover:bg-[#E0E7FF] transition flex-shrink-0"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Enlace de evidencia */}
           {!isObserver && (
