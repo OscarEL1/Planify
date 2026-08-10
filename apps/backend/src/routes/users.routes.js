@@ -1,12 +1,6 @@
 import { Router } from 'express';
-import {
-  createUsersController,
-  createDeleteUserController,
-  createInviteUserController,
-  createUpdateUserRoleController,
-} from '../controllers/users.controller.js';
+import { createUsersController } from '../controllers/users.controller.js';
 import { createAuthenticateToken } from '../middleware/authenticate-token.js';
-import { enforceAdmin } from '../middleware/enforce-admin.js';
 import { tokenBlacklist } from '../services/token-blacklist.js';
 
 export function createUsersRouter(dependencies = {}) {
@@ -18,9 +12,6 @@ export function createUsersRouter(dependencies = {}) {
   });
 
   router.get('/', authenticateToken, createUsersController(dependencies));
-  router.post('/', authenticateToken, enforceAdmin, createInviteUserController(dependencies));
-  router.delete('/:id', authenticateToken, enforceAdmin, createDeleteUserController(dependencies));
-  router.patch('/:id/role', authenticateToken, enforceAdmin, createUpdateUserRoleController(dependencies));
 
   return router;
 }

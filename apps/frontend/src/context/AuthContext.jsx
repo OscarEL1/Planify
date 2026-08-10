@@ -25,10 +25,9 @@ export function AuthProvider({ children }) {
     return {
       user,
       role,
-      isAdmin: role === 'ADMIN',
       isObserver: role === 'OBSERVADOR',
       isTeamMember: role === 'MIEMBRO_EQUIPO',
-      canWrite: role === 'MIEMBRO_EQUIPO' || role === 'ADMIN',
+      canWrite: role === 'MIEMBRO_EQUIPO',
     };
   }, [user]);
 
