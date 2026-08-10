@@ -384,9 +384,9 @@ export default function ActivityDetailPage() {
           </div>
 
           {/* Right sidebar */}
-          <div className="w-72 flex-shrink-0">
+          <div className="w-72 flex-shrink-0 flex flex-col gap-4">
             {/* Información */}
-            <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5 mb-4">
+            <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
               <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-4">
                 Información
               </h3>
