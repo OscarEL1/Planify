@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { logout } from '../../services/authService';
 import { useAuth } from '../../context/useAuth';
-import { useTranslations } from '../../context/SettingsContext';
 
 function getInitials(name) {
   if (!name) return '?';
@@ -27,30 +26,29 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { t } = useTranslations();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
   const ROLE_LABELS = {
-    ADMIN: t('admin'),
-    MIEMBRO_EQUIPO: t('member'),
-    OBSERVADOR: t('observer'),
+    ADMIN: 'Administrador',
+    MIEMBRO_EQUIPO: 'Miembro del equipo',
+    OBSERVADOR: 'Observador',
   };
 
   const NAV_SECTIONS = [
     {
-      title: t('principal'),
+      title: 'PRINCIPAL',
       links: [
-        { to: '/dashboard', label: t('dashboard'), icon: LayoutDashboard },
-        { to: '/kanban', label: t('kanban'), icon: LayoutPanelLeft },
-        { to: '/activities', label: t('activities'), icon: ListChecks },
+        { to: '/dashboard', label: 'Panel de inicio', icon: LayoutDashboard },
+        { to: '/kanban', label: 'Tablero Kanban', icon: LayoutPanelLeft },
+        { to: '/activities', label: 'Actividades', icon: ListChecks },
       ],
     },
     {
-      title: t('workspace'),
+      title: 'ESPACIO DE TRABAJO',
       links: [
-        { to: '/team', label: t('team'), icon: User },
-        { to: '/settings', label: t('settings'), icon: Settings },
+        { to: '/team', label: 'Equipo', icon: User },
+        { to: '/settings', label: 'Configuración', icon: Settings },
       ],
     },
   ];
@@ -130,7 +128,7 @@ export default function Navbar() {
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
             >
               <User size={16} />
-              {t('profile')}
+              Perfil
             </button>
             <button
               type="button"
@@ -138,7 +136,7 @@ export default function Navbar() {
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
             >
               <Settings size={16} />
-              {t('settings')}
+              Configuración
             </button>
             <div className="border-t border-gray-100 mt-1">
               <button
@@ -147,7 +145,7 @@ export default function Navbar() {
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
               >
                 <LogOut size={16} />
-                {t('logout')}
+                Cerrar sesión
               </button>
             </div>
           </div>
@@ -166,7 +164,7 @@ export default function Navbar() {
           <div className="flex-1 min-w-0 text-left">
             <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
             <p className="text-xs text-gray-500 truncate">
-              {ROLE_LABELS[user?.role] ?? t('member')}
+              {ROLE_LABELS[user?.role] ?? 'Miembro del equipo'}
             </p>
           </div>
           <MoreVertical size={16} className="text-gray-400 flex-shrink-0" />
