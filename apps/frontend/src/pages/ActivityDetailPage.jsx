@@ -384,126 +384,122 @@ export default function ActivityDetailPage() {
           </div>
 
           {/* Right sidebar */}
-          <div className="w-72 flex-shrink-0">
-            <div className="bg-[#F8F9FB] border border-[#E4E7EC] rounded-2xl p-5 flex flex-col gap-5">
-              {/* Información */}
-              <div>
-                <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-4">
-                  Información
-                </h3>
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#64748B]">Estado</span>
+          <div className="w-72 flex-shrink-0 flex flex-col gap-5">
+            {/* Información - solo esta tiene fondo gris */}
+            <div className="bg-[#F8F9FB] border border-[#E4E7EC] rounded-2xl p-5">
+              <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-4">
+                Información
+              </h3>
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#64748B]">Estado</span>
+                  <span
+                    className="flex items-center gap-1.5 text-sm"
+                    style={{ color: status.color }}
+                  >
                     <span
-                      className="flex items-center gap-1.5 text-sm"
-                      style={{ color: status.color }}
-                    >
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: status.dot }}
-                      />
-                      {status.label}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#64748B]">Prioridad</span>
-                    <span
-                      className="text-xs font-medium px-2 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: priority.bg,
-                        color: priority.color,
-                      }}
-                    >
-                      {priority.label}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#64748B]">Responsable</span>
-                    {activity.assignee ? (
-                      <div className="flex items-center gap-1.5">
-                        <div
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
-                          style={{
-                            backgroundColor: getAvatarColor(
-                              activity.assignee.name,
-                            ),
-                          }}
-                        >
-                          {getInitials(activity.assignee.name)}
-                        </div>
-                        <span className="text-sm text-[#1D2433]">
-                          {activity.assignee.name}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-sm text-[#A0AEC0]">
-                        Sin asignar
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#64748B]">Fecha límite</span>
-                    <span className="flex items-center gap-1 text-sm text-[#1D2433]">
-                      <Calendar size={12} />
-                      {activity.dueDate
-                        ? formatDate(activity.dueDate)
-                        : "Sin fecha"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#64748B]">Subtareas</span>
-                    <span className="text-sm text-[#1D2433]">
-                      {completedSubtasks}/{totalSubtasks} completadas
-                    </span>
-                  </div>
-                  {totalSubtasks > 0 && (
-                    <div className="w-full h-1.5 bg-[#E4E7EC] rounded-full overflow-hidden">
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: status.dot }}
+                    />
+                    {status.label}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#64748B]">Prioridad</span>
+                  <span
+                    className="text-xs font-medium px-2 py-0.5 rounded-full"
+                    style={{
+                      backgroundColor: priority.bg,
+                      color: priority.color,
+                    }}
+                  >
+                    {priority.label}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#64748B]">Responsable</span>
+                  {activity.assignee ? (
+                    <div className="flex items-center gap-1.5">
                       <div
-                        className="h-full bg-[#4F46E5] rounded-full"
-                        style={{ width: `${subtaskProgress}%` }}
-                      />
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
+                        style={{
+                          backgroundColor: getAvatarColor(
+                            activity.assignee.name,
+                          ),
+                        }}
+                      >
+                        {getInitials(activity.assignee.name)}
+                      </div>
+                      <span className="text-sm text-[#1D2433]">
+                        {activity.assignee.name}
+                      </span>
                     </div>
+                  ) : (
+                    <span className="text-sm text-[#A0AEC0]">
+                      Sin asignar
+                    </span>
                   )}
                 </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#64748B]">Fecha límite</span>
+                  <span className="flex items-center gap-1 text-sm text-[#1D2433]">
+                    <Calendar size={12} />
+                    {activity.dueDate
+                      ? formatDate(activity.dueDate)
+                      : "Sin fecha"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[#64748B]">Subtareas</span>
+                  <span className="text-sm text-[#1D2433]">
+                    {completedSubtasks}/{totalSubtasks} completadas
+                  </span>
+                </div>
+                {totalSubtasks > 0 && (
+                  <div className="w-full h-1.5 bg-[#E4E7EC] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#4F46E5] rounded-full"
+                      style={{ width: `${subtaskProgress}%` }}
+                    />
+                  </div>
+                )}
               </div>
+            </div>
 
-              <div className="border-t border-[#E4E7EC]" />
-
-              {/* Subtareas */}
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <CheckSquare size={16} className="text-[#1D2433]" />
-                  <h3 className="text-sm font-semibold text-[#1D2433]">
-                    Subtareas
-                  </h3>
-                </div>
-                <div className="flex flex-col gap-2">
-                  {activity.subtasks?.map((subtask) => (
-                    <label
-                      key={subtask.id}
-                      className={`flex items-center gap-2.5 ${
-                        isObserver ? "cursor-default" : "cursor-pointer"
+            {/* Subtareas - sin fondo, solo sección */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <CheckSquare size={16} className="text-[#1D2433]" />
+                <h3 className="text-sm font-semibold text-[#1D2433]">
+                  Subtareas
+                </h3>
+              </div>
+              <div className="flex flex-col gap-2">
+                {activity.subtasks?.map((subtask) => (
+                  <label
+                    key={subtask.id}
+                    className={`flex items-center gap-2.5 ${
+                      isObserver ? "cursor-default" : "cursor-pointer"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={subtask.done}
+                      disabled={isObserver}
+                      onChange={() => handleToggleSubtask(subtask)}
+                      className={`w-4 h-4 rounded accent-[#4F46E5] ${
+                        isObserver
+                          ? "cursor-default opacity-70"
+                          : "cursor-pointer"
                       }`}
+                    />
+                    <span
+                      className={`text-sm ${subtask.done ? "line-through text-[#A0AEC0]" : "text-[#1D2433]"}`}
                     >
-                      <input
-                        type="checkbox"
-                        checked={subtask.done}
-                        disabled={isObserver}
-                        onChange={() => handleToggleSubtask(subtask)}
-                        className={`w-4 h-4 rounded accent-[#4F46E5] ${
-                          isObserver
-                            ? "cursor-default opacity-70"
-                            : "cursor-pointer"
-                        }`}
-                      />
-                      <span
-                        className={`text-sm ${subtask.done ? "line-through text-[#A0AEC0]" : "text-[#1D2433]"}`}
-                      >
-                        {subtask.text}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                      {subtask.text}
+                    </span>
+                  </label>
+                ))}
               </div>
             </div>
           </div>
