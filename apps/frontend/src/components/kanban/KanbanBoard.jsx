@@ -44,13 +44,18 @@ function KanbanCard({ activity, onClick }) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(activity); }}
       className="w-full bg-white rounded-xl p-4 shadow-sm border border-[#E4E7EC] text-left hover:shadow-md transition cursor-pointer"
     >
-      <div className="flex items-center justify-between mb-2.5">
+      <div className="flex items-center gap-2 mb-2.5">
         <span
           className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
           style={{ backgroundColor: priority.bg, color: priority.text }}
         >
           {priority.label}
         </span>
+        {overdue && (
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#FEF2F2] text-[#EF4444] border border-[#FECACA]">
+            Vencida
+          </span>
+        )}
       </div>
 
       <h3 className="text-[13px] font-semibold text-[#1D2433] mb-3 line-clamp-2 leading-snug">{activity.title}</h3>
@@ -157,8 +162,8 @@ export default function KanbanBoard({ activities: filteredActivities, isObserver
           <div key={column.id} className="flex flex-col">
             <div className="flex items-center gap-2 mb-3 px-1">
               <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: column.color }} />
-              <h3 className="text-xs font-bold text-[#1D2433] uppercase tracking-wide">{column.title}</h3>
-              <span className="text-[10px] font-bold text-[#64748B] bg-[#F1F5F9] px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+              <h3 className="text-sm font-semibold text-[#1D2433]">{column.title}</h3>
+              <span className="text-[11px] font-medium text-[#64748B] bg-[#F1F5F9] px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                 {columnActivities.length}
               </span>
             </div>

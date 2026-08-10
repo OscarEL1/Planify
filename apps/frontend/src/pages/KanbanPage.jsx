@@ -28,11 +28,6 @@ export default function KanbanPage() {
   }, [activities, filterAssignee, filterPriority]);
 
   const total = filteredActivities.length;
-  const pending = filteredActivities.filter((a) => a.status === 'PENDIENTE').length;
-  const inProgress = filteredActivities.filter((a) => a.status === 'EN_PROCESO').length;
-  const inReview = filteredActivities.filter((a) => a.status === 'EN_REVISION').length;
-  const completed = filteredActivities.filter((a) => a.status === 'COMPLETADA').length;
-  const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   const selectedAssigneeName = filterAssignee === 'all'
     ? 'Todos'
@@ -52,16 +47,21 @@ export default function KanbanPage() {
               Gestiona las actividades de tu equipo escolar.
             </p>
           </div>
-          {!isObserver && (
-          <button
-             type="button"
-              onClick={() => setShowCreateModal(true)}
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-[#64748B]">
+              {total} de {activities?.length || 0} actividades
+            </span>
+            {!isObserver && (
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
                 className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-semibold px-4 py-2.5 rounded-lg transition"
-                  >
-            <Plus size={16} />
-              Nueva actividad
-            </button>
-        )}
+              >
+                <Plus size={16} />
+                Nueva actividad
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Filtros */}
@@ -141,44 +141,6 @@ export default function KanbanPage() {
                 ))}
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Indicadores */}
-        <div className="flex items-center gap-6 mb-6 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-[#64748B]">Total:</span>
-            <span className="font-semibold text-[#1D2433]">{total}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
-            <span className="text-[#64748B]">Pendientes:</span>
-            <span className="font-semibold text-[#1D2433]">{pending}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#3B82F6]" />
-            <span className="text-[#64748B]">En proceso:</span>
-            <span className="font-semibold text-[#1D2433]">{inProgress}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
-            <span className="text-[#64748B]">En revisión:</span>
-            <span className="font-semibold text-[#1D2433]">{inReview}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
-            <span className="text-[#64748B]">Completadas:</span>
-            <span className="font-semibold text-[#1D2433]">{completed}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[#64748B]">Avance:</span>
-            <div className="w-24 h-2 bg-[#E4E7EC] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#4F46E5] rounded-full transition-all"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <span className="font-semibold text-[#1D2433]">{progressPercent}%</span>
           </div>
         </div>
 
