@@ -18,13 +18,14 @@ import {
 import { useToast } from "../components/common/useToast";
 import { useAuth } from "../context/useAuth";
 import ActivityFormModal from "../components/activities/ActivityFormModal";
+import { getInitials, getAvatarColor } from "../utils/avatarColors";
 
 const statusStyles = {
   PENDIENTE: {
-    bg: "#F1F5F9",
-    color: "#64748B",
+    bg: "#FFFBEB",
+    color: "#F59E0B",
     label: "Pendiente",
-    dot: "#94A3B8",
+    dot: "#F59E0B",
   },
   EN_PROCESO: {
     bg: "#EFF6FF",
@@ -51,34 +52,6 @@ const priorityStyles = {
   MEDIA: { bg: "#FFFBEB", color: "#F59E0B", label: "Media" },
   BAJA: { bg: "#F0FDF4", color: "#22C55E", label: "Baja" },
 };
-
-const avatarColors = [
-  "#4F46E5",
-  "#0891B2",
-  "#059669",
-  "#D97706",
-  "#DC2626",
-  "#7C3AED",
-  "#DB2777",
-];
-
-function getInitials(name) {
-  if (!name) return "?";
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-function getAvatarColor(name) {
-  if (!name) return avatarColors[0];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++)
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return avatarColors[Math.abs(hash) % avatarColors.length];
-}
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString("es-MX", {
@@ -144,7 +117,7 @@ export default function ActivityDetailPage() {
   if (isLoading) {
     return (
       <div
-        className="flex min-h-screen w-full bg-[#F9FAFB]"
+        className="flex min-h-screen w-full bg-[#F9FAFB] transition-colors"
       >
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
@@ -157,7 +130,7 @@ export default function ActivityDetailPage() {
   if (isError || !activity) {
     return (
       <div
-        className="flex min-h-screen w-full bg-[#F9FAFB]"
+        className="flex min-h-screen w-full bg-[#F9FAFB] transition-colors"
       >
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
@@ -169,49 +142,49 @@ export default function ActivityDetailPage() {
 
   return (
     <div
-      className="flex min-h-screen w-full bg-[#F9FAFB]"
+      className="flex min-h-screen w-full bg-[#F9FAFB] transition-colors"
     >
       <Navbar />
 
-      <main className="flex-1 px-8 py-10">
+      <main className="flex-1 px-8 py-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#E4E7EC]">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => navigate("/kanban")}
-              className="flex items-center gap-1 text-sm text-[#64748B] hover:text-[#1D2433] transition"
+              className="flex items-center gap-1 text-xs text-[#64748B] hover:text-[#1D2433] transition"
             >
               <ArrowLeft size={16} />
               Tablero
             </button>
             <span className="text-[#A0AEC0]">/</span>
-            <span className="text-sm font-medium text-[#1D2433]">
+            <span className="text-xs font-medium text-[#1D2433]">
               Detalle de actividad
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {!isObserver && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(true)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E4E7EC] text-sm font-medium text-[#1D2433] hover:bg-[#F8F9FB]:bg-[#374151] transition"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E4E7EC] text-xs font-medium text-[#1D2433] hover:bg-[#F8F9FB] transition"
                 >
-                  <Edit2 size={14} />
+                  <Edit2 size={12} />
                   Editar
                 </button>
 
                 <button
                   type="button"
                   onClick={handleDelete}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition ${
                     confirmingDelete
                       ? "bg-[#EF4444] border-[#EF4444] text-white"
                       : "border-[#FCA5A5] text-[#EF4444] hover:bg-[#FEF2F2]"
                   }`}
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={12} />
                   {confirmingDelete ? "¿Confirmar?" : "Eliminar"}
                 </button>
               </div>
@@ -219,11 +192,94 @@ export default function ActivityDetailPage() {
           </div>
         </div>
 
-        {/* Contenido principal */}
+        {/* ID, categoría y estado + sidebar alineado */}
         <div className="flex gap-6 items-start">
-          {/* Comments */}
           <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-semibold text-[#4F46E5] bg-[#EEF2FF] px-2 py-0.5 rounded">
+                ACT-{activity.id?.slice(0, 4).toUpperCase()}
+              </span>
+              <span className="text-xs text-[#64748B]">·</span>
+              <span className="text-xs text-[#64748B]">Actividad Escolar</span>
+              <span className="text-xs text-[#64748B]">·</span>
+              <span
+                className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: status.bg, color: status.color }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: status.dot }}
+                />
+                {status.label}
+              </span>
+            </div>
+
+            {/* Título y descripción */}
+            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-2">
+              {activity.title}
+            </h1>
+            {activity.description && (
+              <p className="text-sm text-[#64748B] mb-6">
+                {activity.description}
+              </p>
+            )}
+            {!activity.description && <div className="mb-6" />}
+
+            {/* Evidencia */}
             <div className="mb-8">
+              <h2 className="text-sm font-semibold text-[#1D2433] mb-3">
+                Evidencia
+              </h2>
+              {activity.evidenceUrl ? (
+                <div className="flex items-center justify-between bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg px-4 py-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Link2 size={14} className="text-[#22C55E] flex-shrink-0" />
+                    <a
+                      href={activity.evidenceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-[#4F46E5] hover:underline truncate"
+                    >
+                      {activity.evidenceUrl}
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText(activity.evidenceUrl)}
+                      className="p-1.5 rounded hover:bg-[#DCFCE7] transition"
+                      title="Copiar enlace"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#64748B]">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                    </button>
+                    <a
+                      href={activity.evidenceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1.5 rounded hover:bg-[#DCFCE7] transition"
+                      title="Abrir enlace"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#64748B]">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-[#A0AEC0] bg-[#F8F9FB] rounded-lg px-4 py-3">
+                  <Link2 size={14} />
+                  Aún no se ha registrado evidencia de entrega
+                </div>
+              )}
+            </div>
+
+            {/* Comentarios */}
+            <div>
               <div className="flex items-center gap-2 mb-4">
                 <MessageSquare size={16} className="text-[#1D2433]" />
                 <h2 className="text-sm font-semibold text-[#1D2433]">
@@ -302,10 +358,10 @@ export default function ActivityDetailPage() {
           </div>
 
           {/* Right sidebar */}
-          <div className="w-72 flex-shrink-0">
+          <div className="w-80 flex-shrink-0 pl-6 border-l border-[#E4E7EC] flex flex-col gap-5">
             {/* Información */}
-            <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5 mb-4">
-              <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-4">
+            <div className="bg-[#F8F9FB] border border-[#E4E7EC] rounded-2xl p-4">
+              <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-3">
                 Información
               </h3>
               <div className="flex flex-col gap-3">
@@ -337,9 +393,9 @@ export default function ActivityDetailPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#64748B]">Responsable</span>
                   {activity.assignee ? (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2 min-w-0">
                       <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
                         style={{
                           backgroundColor: getAvatarColor(
                             activity.assignee.name,
@@ -348,7 +404,7 @@ export default function ActivityDetailPage() {
                       >
                         {getInitials(activity.assignee.name)}
                       </div>
-                      <span className="text-sm text-[#1D2433]">
+                      <span className="text-sm text-[#1D2433] truncate">
                         {activity.assignee.name}
                       </span>
                     </div>
@@ -370,25 +426,6 @@ export default function ActivityDetailPage() {
               </div>
             </div>
 
-            {/* Evidencia */}
-            {activity.evidenceUrl && (
-              <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Link2 size={16} className="text-[#1D2433]" />
-                  <h3 className="text-sm font-semibold text-[#1D2433]">
-                    Evidencia
-                  </h3>
-                </div>
-                <a
-                  href={activity.evidenceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-[#4F46E5] hover:underline break-all"
-                >
-                  {activity.evidenceUrl}
-                </a>
-              </div>
-            )}
           </div>
         </div>
       </main>

@@ -5,20 +5,7 @@ import { useActivitiesQuery, useUsersQuery } from '../hooks/useActivities';
 import { useState, useMemo } from 'react';
 import ActivityFormModal from '../components/activities/ActivityFormModal';
 import { useAuth } from '../context/useAuth';
-
-const avatarColors = ['#4F46E5', '#0891B2', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777'];
-
-function getInitials(name) {
-  if (!name) return '?';
-  return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
-}
-
-function getAvatarColor(name) {
-  if (!name) return avatarColors[0];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return avatarColors[Math.abs(hash) % avatarColors.length];
-}
+import { getInitials, getAvatarColor } from '../utils/avatarColors';
 
 export default function KanbanPage() {
   const { data: activities } = useActivitiesQuery();
@@ -41,55 +28,46 @@ export default function KanbanPage() {
   }, [activities, filterAssignee, filterPriority]);
 
   const total = filteredActivities.length;
-  const pending = filteredActivities.filter((a) => a.status === 'PENDIENTE').length;
-  const inProgress = filteredActivities.filter((a) => a.status === 'EN_PROCESO').length;
-  const inReview = filteredActivities.filter((a) => a.status === 'EN_REVISION').length;
-  const completed = filteredActivities.filter((a) => a.status === 'COMPLETADA').length;
-  const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   const selectedAssigneeName = filterAssignee === 'all'
     ? 'Todos'
     : users?.find((u) => u.id === filterAssignee)?.name || 'Todos';
 
   return (
-    <div className="flex min-h-screen w-full bg-[#F9FAFB]">
+    <div className="flex min-h-screen w-full bg-[#F9FAFB] transition-colors">
       <Navbar />
 
       <main className="flex-1 px-8 py-10">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-1">
-              Tablero
-            </h1>
-            <p className="text-sm text-[#64748B]">
-              Gestiona las actividades de tu equipo escolar.
-            </p>
-          </div>
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E4E7EC]">
+          <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433]">
+            Tablero
+          </h1>
           {!isObserver && (
-          <button
-             type="button"
+            <button
+              type="button"
               onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-semibold px-4 py-2.5 rounded-lg transition"
-                  >
-            <Plus size={16} />
+              className="flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-semibold px-4 py-2.5 rounded-lg transition"
+            >
+              <Plus size={16} />
               Nueva actividad
             </button>
-        )}
+          )}
         </div>
 
         {/* Filtros */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="flex items-center gap-2 text-sm text-[#64748B]">
-            <Filter size={16} />
-            Filtrar por:
-          </div>
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E4E7EC]">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-[#64748B]">
+              <Filter size={16} />
+              Filtrar por:
+            </div>
 
           {/* Filtro Responsable */}
           <div className="relative">
             <button
               type="button"
               onClick={() => { setAssigneeDropdownOpen(!assigneeDropdownOpen); setPriorityDropdownOpen(false); }}
-              className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded-lg px-3 py-2 text-sm text-[#1D2433] hover:bg-[#F8F9FB]:bg-[#374151] transition"
+              className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded-lg px-3 py-2 text-sm text-[#1D2433] hover:bg-[#F8F9FB] transition"
             >
               Responsable: {selectedAssigneeName}
               <ChevronDown size={14} className="text-[#A0AEC0]" />
@@ -99,7 +77,7 @@ export default function KanbanPage() {
                 <button
                   type="button"
                   onClick={() => { setFilterAssignee('all'); setAssigneeDropdownOpen(false); }}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB]:bg-[#374151] ${filterAssignee === 'all' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterAssignee === 'all' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                 >
                   Todos
                 </button>
@@ -108,7 +86,7 @@ export default function KanbanPage() {
                     key={u.id}
                     type="button"
                     onClick={() => { setFilterAssignee(u.id); setAssigneeDropdownOpen(false); }}
-                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#F8F9FB]:bg-[#374151] ${filterAssignee === u.id ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterAssignee === u.id ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                   >
                     <div
                       className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
@@ -128,7 +106,7 @@ export default function KanbanPage() {
             <button
               type="button"
               onClick={() => { setPriorityDropdownOpen(!priorityDropdownOpen); setAssigneeDropdownOpen(false); }}
-              className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded-lg px-3 py-2 text-sm text-[#1D2433] hover:bg-[#F8F9FB]:bg-[#374151] transition"
+              className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded-lg px-3 py-2 text-sm text-[#1D2433] hover:bg-[#F8F9FB] transition"
             >
               Prioridad: {filterPriority === 'all' ? 'Todas' : filterPriority === 'ALTA' ? 'Alta' : filterPriority === 'MEDIA' ? 'Media' : 'Baja'}
               <ChevronDown size={14} className="text-[#A0AEC0]" />
@@ -138,7 +116,7 @@ export default function KanbanPage() {
                 <button
                   type="button"
                   onClick={() => { setFilterPriority('all'); setPriorityDropdownOpen(false); }}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB]:bg-[#374151] ${filterPriority === 'all' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterPriority === 'all' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                 >
                   Todas
                 </button>
@@ -147,7 +125,7 @@ export default function KanbanPage() {
                     key={p}
                     type="button"
                     onClick={() => { setFilterPriority(p); setPriorityDropdownOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB]:bg-[#374151] ${filterPriority === p ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterPriority === p ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                   >
                     {p === 'ALTA' ? 'Alta' : p === 'MEDIA' ? 'Media' : 'Baja'}
                   </button>
@@ -155,44 +133,10 @@ export default function KanbanPage() {
               </div>
             )}
           </div>
-        </div>
-
-        {/* Indicadores */}
-        <div className="flex items-center gap-6 mb-6 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-[#64748B]">Total:</span>
-            <span className="font-semibold text-[#1D2433]">{total}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#94A3B8]" />
-            <span className="text-[#64748B]">Pendientes:</span>
-            <span className="font-semibold text-[#1D2433]">{pending}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#3B82F6]" />
-            <span className="text-[#64748B]">En proceso:</span>
-            <span className="font-semibold text-[#1D2433]">{inProgress}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#8B5CF6]" />
-            <span className="text-[#64748B]">En revisión:</span>
-            <span className="font-semibold text-[#1D2433]">{inReview}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
-            <span className="text-[#64748B]">Completadas:</span>
-            <span className="font-semibold text-[#1D2433]">{completed}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[#64748B]">Avance:</span>
-            <div className="w-24 h-2 bg-[#E4E7EC] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#4F46E5] rounded-full transition-all"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <span className="font-semibold text-[#1D2433]">{progressPercent}%</span>
-          </div>
+          <span className="text-sm text-[#64748B]">
+            {total} de {activities?.length || 0} actividades
+          </span>
         </div>
 
         <KanbanBoard activities={filteredActivities} isObserver={isObserver} />
