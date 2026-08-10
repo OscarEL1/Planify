@@ -257,15 +257,45 @@ export default function ActivityDetailPage() {
                 Evidencia
               </h2>
               {activity.evidenceUrl ? (
-                <a
-                  href={activity.evidenceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-[#4F46E5] hover:underline"
-                >
-                  <Link2 size={14} />
-                  {activity.evidenceUrl}
-                </a>
+                <div className="flex items-center justify-between bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg px-4 py-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Link2 size={14} className="text-[#22C55E] flex-shrink-0" />
+                    <a
+                      href={activity.evidenceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-[#4F46E5] hover:underline truncate"
+                    >
+                      {activity.evidenceUrl}
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText(activity.evidenceUrl)}
+                      className="p-1.5 rounded hover:bg-[#DCFCE7] transition"
+                      title="Copiar enlace"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#64748B]">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                    </button>
+                    <a
+                      href={activity.evidenceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1.5 rounded hover:bg-[#DCFCE7] transition"
+                      title="Abrir enlace"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#64748B]">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
               ) : (
                 <div className="flex items-center gap-2 text-sm text-[#A0AEC0] bg-[#F8F9FB] rounded-lg px-4 py-3">
                   <Link2 size={14} />
