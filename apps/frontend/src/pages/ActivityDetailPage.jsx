@@ -248,9 +248,9 @@ export default function ActivityDetailPage() {
         )}
 
         {/* Contenido principal */}
-        <div className="flex gap-6 items-start">
+        <div className="flex gap-0 items-start">
           {/* Columna izquierda */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 pr-6">
             {/* Evidencia */}
             <div className="mb-8">
               <h2 className="text-sm font-semibold text-[#1D2433] mb-3">
@@ -384,10 +384,10 @@ export default function ActivityDetailPage() {
           </div>
 
           {/* Right sidebar */}
-          <div className="w-72 flex-shrink-0 flex flex-col gap-5">
-            {/* Información - solo esta tiene fondo gris */}
-            <div className="bg-[#F8F9FB] border border-[#E4E7EC] rounded-2xl p-5">
-              <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-4">
+          <div className="w-72 flex-shrink-0 pl-6 border-l border-[#E4E7EC] flex flex-col gap-5">
+            {/* Información */}
+            <div className="bg-[#F8F9FB] border border-[#E4E7EC] rounded-2xl p-4">
+              <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-3">
                 Información
               </h3>
               <div className="flex flex-col gap-3">
