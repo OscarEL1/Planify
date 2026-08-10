@@ -164,7 +164,7 @@ export default function KanbanPage() {
             <span className="font-semibold text-[#1D2433]">{total}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#94A3B8]" />
+            <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
             <span className="text-[#64748B]">Pendientes:</span>
             <span className="font-semibold text-[#1D2433]">{pending}</span>
           </div>

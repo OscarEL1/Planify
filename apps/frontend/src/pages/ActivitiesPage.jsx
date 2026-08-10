@@ -20,7 +20,7 @@ function getAvatarColor(name) {
 }
 
 const statusStyles = {
-  PENDIENTE: 'bg-[#F1F5F9] text-[#64748B]',
+  PENDIENTE: 'bg-[#FFFBEB] text-[#F59E0B]',
   EN_PROCESO: 'bg-[#EFF6FF] text-[#3B82F6]',
   EN_REVISION: 'bg-[#F5F3FF] text-[#8B5CF6]',
   COMPLETADA: 'bg-[#F0FDF4] text-[#22C55E]',

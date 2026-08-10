@@ -8,7 +8,7 @@ import {
 } from "../hooks/useActivities";
 
 const statusColors = {
-  PENDIENTE: "#94A3B8",
+  PENDIENTE: "#F59E0B",
   EN_PROCESO: "#3B82F6",
   EN_REVISION: "#8B5CF6",
   COMPLETADA: "#22C55E",

@@ -35,7 +35,7 @@ const priorities = [
 ];
 
 const statusOptions = [
-  { value: "PENDIENTE", label: "Pendiente", dot: "#94A3B8" },
+  { value: "PENDIENTE", label: "Pendiente", dot: "#F59E0B" },
   { value: "EN_PROCESO", label: "En proceso", dot: "#3B82F6" },
   { value: "EN_REVISION", label: "En revisión", dot: "#8B5CF6" },
   { value: "COMPLETADA", label: "Completada", dot: "#22C55E" },

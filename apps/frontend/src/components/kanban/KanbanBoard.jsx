@@ -5,7 +5,7 @@ import { useUpdateActivityStatusMutation } from '../../hooks/useActivities';
 import { useToast } from '../common/useToast';
 
 const columns = [
-  { id: 'PENDIENTE', title: 'Pendiente', color: '#94A3B8', bgClass: 'bg-[#F1F5F9]' },
+  { id: 'PENDIENTE', title: 'Pendiente', color: '#F59E0B', bgClass: 'bg-[#FFFBEB]' },
   { id: 'EN_PROCESO', title: 'En proceso', color: '#3B82F6', bgClass: 'bg-[#EFF6FF]' },
   { id: 'EN_REVISION', title: 'En revisión', color: '#8B5CF6', bgClass: 'bg-[#F5F3FF]' },
   { id: 'COMPLETADA', title: 'Completada', color: '#22C55E', bgClass: 'bg-[#F0FDF4]' },
