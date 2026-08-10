@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Calendar, Link2, AlertTriangle, MessageSquare, CheckSquare } from 'lucide-react';
+import { Calendar, Link2, AlertTriangle, MessageSquare } from 'lucide-react';
 import { useUpdateActivityStatusMutation } from '../../hooks/useActivities';
 import { useToast } from '../common/useToast';
 import { getInitials, getAvatarColor } from '../../utils/avatarColors';
@@ -32,9 +32,6 @@ function formatDate(dateStr) {
 function KanbanCard({ activity, onClick }) {
   const priority = priorityStyles[activity.priority] || priorityStyles.MEDIA;
   const overdue = isOverdue(activity.dueDate, activity.status);
-  const completedSubtasks = activity.subtasks?.filter((s) => s.done).length || 0;
-  const totalSubtasks = activity.subtasks?.length || 0;
-  const subtaskProgress = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
 
   return (
     <div
@@ -92,23 +89,7 @@ function KanbanCard({ activity, onClick }) {
         )}
       </div>
 
-      {totalSubtasks > 0 && (
-        <div className="mt-2.5 pt-2.5 border-t border-[#F1F5F9]">
-          <div className="flex items-center justify-between text-[11px] text-[#64748B] mb-1.5">
-            <span className="flex items-center gap-1">
-              <CheckSquare size={11} />
-              {completedSubtasks}/{totalSubtasks}
-            </span>
-            <span className="font-medium">{Math.round(subtaskProgress)}%</span>
-          </div>
-          <div className="w-full h-1.5 bg-[#E4E7EC] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#4F46E5] rounded-full transition-all"
-              style={{ width: `${subtaskProgress}%` }}
-            />
-          </div>
-        </div>
-      )}
+      {/* Subtareas ocultas temporalmente (sin HU asociada) */}
     </div>
   );
 }

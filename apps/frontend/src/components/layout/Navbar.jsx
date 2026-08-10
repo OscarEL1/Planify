@@ -46,6 +46,13 @@ export default function Navbar() {
         { to: '/activities', label: t('activities'), icon: ListChecks },
       ],
     },
+    {
+      title: t('workspace'),
+      links: [
+        { to: '/team', label: t('team'), icon: User },
+        { to: '/settings', label: t('settings'), icon: Settings },
+      ],
+    },
   ];
 
   const handleLogout = async () => {
@@ -69,24 +76,24 @@ export default function Navbar() {
   return (
     <aside className="relative w-[220px] h-screen sticky top-0 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col transition-colors">
       <div className="flex items-center gap-2.5 px-5 h-16 border-b border-gray-100">
-        <div className="w-8 h-8 rounded-lg bg-[#5B50D6] flex items-center justify-center flex-shrink-0">
-          <LayoutPanelLeft size={16} className="text-white" />
+        <div className="w-9 h-9 rounded-xl bg-[#5B50D6] flex items-center justify-center flex-shrink-0">
+          <LayoutPanelLeft size={18} className="text-white" />
         </div>
         <div>
-          <p className="font-['Plus_Jakarta_Sans'] text-sm font-bold text-[#1D2433] leading-tight">
+          <p className="font-['Plus_Jakarta_Sans'] text-lg font-bold text-[#1D2433] leading-tight">
             Planify
           </p>
           <p className="text-[10px] text-[#64748B] leading-tight">Gestor de Actividades</p>
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-6">
+      <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-5">
         {NAV_SECTIONS.map((section) => (
           <div key={section.title}>
-            <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wide text-[#A0AEC0]">
+            <p className="px-3 mb-2.5 text-[10px] font-semibold uppercase tracking-wide text-[#A0AEC0]">
               {section.title}
             </p>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-0.5">
               {section.links.map((link) => {
                 const isActive = location.pathname === link.to;
                 const Icon = link.icon;
@@ -94,7 +101,7 @@ export default function Navbar() {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition ${
+                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition ${
                       isActive
                         ? 'bg-[#F0EEF8] text-[#5B50D6]'
                         : 'text-[#64748B] hover:bg-[#F8F9FB] hover:text-[#1D2433]'

@@ -5,7 +5,6 @@ import {
   Edit2,
   Trash2,
   MessageSquare,
-  CheckSquare,
   Calendar,
   Link2,
   Loader2,
@@ -13,7 +12,6 @@ import {
 import Navbar from "../components/layout/Navbar";
 import {
   useActivityByIdQuery,
-  useUpdateActivityMutation,
   useDeleteActivityMutation,
   useAddCommentMutation,
 } from "../hooks/useActivities";
@@ -81,7 +79,6 @@ export default function ActivityDetailPage() {
   const { showToast } = useToast();
   const { isObserver } = useAuth();
   const { data: activity, isLoading, isError } = useActivityByIdQuery(id);
-  const updateMutation = useUpdateActivityMutation();
   const deleteMutation = useDeleteActivityMutation();
   const addCommentMutation = useAddCommentMutation();
 
@@ -91,11 +88,6 @@ export default function ActivityDetailPage() {
 
   const status = statusStyles[activity?.status] || statusStyles.PENDIENTE;
   const priority = priorityStyles[activity?.priority] || priorityStyles.MEDIA;
-  const completedSubtasks =
-    activity?.subtasks?.filter((s) => s.done).length || 0;
-  const totalSubtasks = activity?.subtasks?.length || 0;
-  const subtaskProgress =
-    totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
 
   const handleSendComment = async () => {
     if (!commentDraft.trim()) return;
@@ -105,23 +97,6 @@ export default function ActivityDetailPage() {
       await addCommentMutation.mutateAsync({ activityId: id, text });
     } catch {
       showToast("No fue posible agregar el comentario.", "error");
-    }
-  };
-
-  const handleToggleSubtask = async (subtask) => {
-    if (isObserver) return;
-
-    const updatedSubtasks = activity.subtasks.map((s) =>
-      s.id === subtask.id ? { ...s, done: !s.done } : s,
-    );
-
-    try {
-      await updateMutation.mutateAsync({
-        id,
-        payload: { subtasks: updatedSubtasks },
-      });
-    } catch {
-      showToast("No fue posible actualizar la subtarea.", "error");
     }
   };
 
@@ -171,45 +146,45 @@ export default function ActivityDetailPage() {
     >
       <Navbar />
 
-      <main className="flex-1 px-8 py-10">
+      <main className="flex-1 px-8 py-6">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E4E7EC]">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#E4E7EC]">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => navigate("/kanban")}
-              className="flex items-center gap-1 text-sm text-[#64748B] hover:text-[#1D2433] transition"
+              className="flex items-center gap-1 text-xs text-[#64748B] hover:text-[#1D2433] transition"
             >
               <ArrowLeft size={16} />
               Tablero
             </button>
             <span className="text-[#A0AEC0]">/</span>
-            <span className="text-sm font-medium text-[#1D2433]">
+            <span className="text-xs font-medium text-[#1D2433]">
               Detalle de actividad
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {!isObserver && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(true)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E4E7EC] text-sm font-medium text-[#1D2433] hover:bg-[#F8F9FB] transition"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E4E7EC] text-xs font-medium text-[#1D2433] hover:bg-[#F8F9FB] transition"
                 >
-                  <Edit2 size={14} />
+                  <Edit2 size={12} />
                   Editar
                 </button>
 
                 <button
                   type="button"
                   onClick={handleDelete}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition ${
                     confirmingDelete
                       ? "bg-[#EF4444] border-[#EF4444] text-white"
                       : "border-[#FCA5A5] text-[#EF4444] hover:bg-[#FEF2F2]"
                   }`}
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={12} />
                   {confirmingDelete ? "¿Confirmar?" : "Eliminar"}
                 </button>
               </div>
@@ -217,41 +192,39 @@ export default function ActivityDetailPage() {
           </div>
         </div>
 
-        {/* ID, categoría y estado */}
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs font-semibold text-[#4F46E5] bg-[#EEF2FF] px-2 py-0.5 rounded">
-            ACT-{activity.id?.slice(0, 4).toUpperCase()}
-          </span>
-          <span className="text-xs text-[#64748B]">·</span>
-          <span className="text-xs text-[#64748B]">Actividad Escolar</span>
-          <span className="text-xs text-[#64748B]">·</span>
-          <span
-            className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: status.bg, color: status.color }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ backgroundColor: status.dot }}
-            />
-            {status.label}
-          </span>
-        </div>
+        {/* ID, categoría y estado + sidebar alineado */}
+        <div className="flex gap-6 items-start">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-semibold text-[#4F46E5] bg-[#EEF2FF] px-2 py-0.5 rounded">
+                ACT-{activity.id?.slice(0, 4).toUpperCase()}
+              </span>
+              <span className="text-xs text-[#64748B]">·</span>
+              <span className="text-xs text-[#64748B]">Actividad Escolar</span>
+              <span className="text-xs text-[#64748B]">·</span>
+              <span
+                className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: status.bg, color: status.color }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: status.dot }}
+                />
+                {status.label}
+              </span>
+            </div>
 
-        {/* Título y descripción */}
-        <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-2">
-          {activity.title}
-        </h1>
-        {activity.description && (
-          <p className="text-sm text-[#64748B] mb-6">
-            {activity.description}
-          </p>
-        )}
-        {!activity.description && <div className="mb-6" />}
+            {/* Título y descripción */}
+            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-2">
+              {activity.title}
+            </h1>
+            {activity.description && (
+              <p className="text-sm text-[#64748B] mb-6">
+                {activity.description}
+              </p>
+            )}
+            {!activity.description && <div className="mb-6" />}
 
-        {/* Contenido principal */}
-        <div className="flex gap-0 items-start">
-          {/* Columna izquierda */}
-          <div className="flex-1 min-w-0 pr-6">
             {/* Evidencia */}
             <div className="mb-8">
               <h2 className="text-sm font-semibold text-[#1D2433] mb-3">
@@ -385,7 +358,7 @@ export default function ActivityDetailPage() {
           </div>
 
           {/* Right sidebar */}
-          <div className="w-72 flex-shrink-0 pl-6 border-l border-[#E4E7EC] flex flex-col gap-5">
+          <div className="w-80 flex-shrink-0 pl-6 border-l border-[#E4E7EC] flex flex-col gap-5">
             {/* Información */}
             <div className="bg-[#F8F9FB] border border-[#E4E7EC] rounded-2xl p-4">
               <h3 className="text-xs font-semibold text-[#64748B] uppercase tracking-wide mb-3">
@@ -420,9 +393,9 @@ export default function ActivityDetailPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#64748B]">Responsable</span>
                   {activity.assignee ? (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2 min-w-0">
                       <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
                         style={{
                           backgroundColor: getAvatarColor(
                             activity.assignee.name,
@@ -431,7 +404,7 @@ export default function ActivityDetailPage() {
                       >
                         {getInitials(activity.assignee.name)}
                       </div>
-                      <span className="text-sm text-[#1D2433]">
+                      <span className="text-sm text-[#1D2433] truncate">
                         {activity.assignee.name}
                       </span>
                     </div>
@@ -450,59 +423,9 @@ export default function ActivityDetailPage() {
                       : "Sin fecha"}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">Subtareas</span>
-                  <span className="text-sm text-[#1D2433]">
-                    {completedSubtasks}/{totalSubtasks} completadas
-                  </span>
-                </div>
-                {totalSubtasks > 0 && (
-                  <div className="w-full h-1.5 bg-[#E4E7EC] rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-[#4F46E5] rounded-full"
-                      style={{ width: `${subtaskProgress}%` }}
-                    />
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Subtareas - sin fondo, solo sección */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <CheckSquare size={16} className="text-[#1D2433]" />
-                <h3 className="text-sm font-semibold text-[#1D2433]">
-                  Subtareas
-                </h3>
-              </div>
-              <div className="flex flex-col gap-2">
-                {activity.subtasks?.map((subtask) => (
-                  <label
-                    key={subtask.id}
-                    className={`flex items-center gap-2.5 ${
-                      isObserver ? "cursor-default" : "cursor-pointer"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={subtask.done}
-                      disabled={isObserver}
-                      onChange={() => handleToggleSubtask(subtask)}
-                      className={`w-4 h-4 rounded accent-[#4F46E5] ${
-                        isObserver
-                          ? "cursor-default opacity-70"
-                          : "cursor-pointer"
-                      }`}
-                    />
-                    <span
-                      className={`text-sm ${subtask.done ? "line-through text-[#A0AEC0]" : "text-[#1D2433]"}`}
-                    >
-                      {subtask.text}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </main>
