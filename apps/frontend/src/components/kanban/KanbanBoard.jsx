@@ -42,7 +42,7 @@ function KanbanCard({ activity, onClick }) {
       tabIndex={0}
       onClick={() => onClick(activity)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(activity); }}
-      className="w-full bg-white rounded-xl p-4 shadow-sm border border-[#E4E7EC] text-left hover:shadow-md transition cursor-pointer"
+      className={`w-full bg-white rounded-xl p-4 shadow-sm text-left hover:shadow-md transition cursor-pointer ${overdue ? 'border-2 border-[#EF4444]' : 'border border-[#E4E7EC]'}`}
     >
       <div className="flex items-center gap-2 mb-2.5">
         <span
@@ -172,7 +172,7 @@ export default function KanbanBoard({ activities: filteredActivities, isObserver
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className={`flex-1 min-h-[200px] rounded-xl p-2 transition-colors ${column.bgClass} ${
+                  className={`flex-1 min-h-[200px] rounded-xl p-2 transition-colors bg-[#F8F9FB] ${
                     snapshot.isDraggingOver ? 'ring-2 ring-[#4F46E5]/30' : ''
                   }`}
                 >
