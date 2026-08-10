@@ -4,23 +4,10 @@ import Navbar from '../components/layout/Navbar';
 import { useActivitiesQuery, useUsersQuery } from '../hooks/useActivities';
 import ActivityFormModal from '../components/activities/ActivityFormModal';
 import { useAuth } from '../context/useAuth';
-
-const avatarColors = ['#4F46E5', '#0891B2', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777'];
-
-function getInitials(name) {
-  if (!name) return '?';
-  return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
-}
-
-function getAvatarColor(name) {
-  if (!name) return avatarColors[0];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return avatarColors[Math.abs(hash) % avatarColors.length];
-}
+import { getInitials, getAvatarColor } from '../utils/avatarColors';
 
 const statusStyles = {
-  PENDIENTE: 'bg-[#F1F5F9] text-[#64748B]',
+  PENDIENTE: 'bg-[#FFFBEB] text-[#F59E0B]',
   EN_PROCESO: 'bg-[#EFF6FF] text-[#3B82F6]',
   EN_REVISION: 'bg-[#F5F3FF] text-[#8B5CF6]',
   COMPLETADA: 'bg-[#F0FDF4] text-[#22C55E]',
@@ -83,18 +70,15 @@ export default function ActivitiesPage() {
   const closeModal = () => setModalMode(null);
 
   return (
-    <div className="flex min-h-screen w-full bg-[#F9FAFB]">
+    <div className="flex min-h-screen w-full bg-[#F9FAFB] transition-colors">
       <Navbar />
 
       <main className="flex-1 px-8 py-10">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E4E7EC]">
           <div>
-            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-1">
+            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433]">
               Actividades
             </h1>
-            <p className="text-sm text-[#64748B]">
-              Gestiona las actividades de tu equipo escolar.
-            </p>
           </div>
           {!isObserver && (
         <button
@@ -109,7 +93,7 @@ export default function ActivitiesPage() {
         </div>
 
         {/* Filtros */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 pb-4 mb-4 border-b border-[#E4E7EC]">
           <div className="flex items-center gap-2 text-sm text-[#64748B]">
             <Filter size={16} />
             Filtrar por:
@@ -120,7 +104,7 @@ export default function ActivitiesPage() {
             <button
               type="button"
               onClick={() => { setAssigneeDropdownOpen(!assigneeDropdownOpen); setPriorityDropdownOpen(false); }}
-              className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded-lg px-3 py-2 text-sm text-[#1D2433] hover:bg-[#F8F9FB]:bg-[#374151] transition"
+              className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded-lg px-3 py-2 text-sm text-[#1D2433] hover:bg-[#F8F9FB] transition"
             >
               Responsable: {selectedAssigneeName}
               <ChevronDown size={14} className="text-[#A0AEC0]" />
@@ -130,7 +114,7 @@ export default function ActivitiesPage() {
                 <button
                   type="button"
                   onClick={() => { setFilterAssignee('all'); setAssigneeDropdownOpen(false); }}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB]:bg-[#374151] ${filterAssignee === 'all' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterAssignee === 'all' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                 >
                   Todos
                 </button>
@@ -139,7 +123,7 @@ export default function ActivitiesPage() {
                     key={u.id}
                     type="button"
                     onClick={() => { setFilterAssignee(u.id); setAssigneeDropdownOpen(false); }}
-                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#F8F9FB]:bg-[#374151] ${filterAssignee === u.id ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterAssignee === u.id ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                   >
                     <div
                       className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
@@ -159,7 +143,7 @@ export default function ActivitiesPage() {
             <button
               type="button"
               onClick={() => { setPriorityDropdownOpen(!priorityDropdownOpen); setAssigneeDropdownOpen(false); }}
-              className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded-lg px-3 py-2 text-sm text-[#1D2433] hover:bg-[#F8F9FB]:bg-[#374151] transition"
+              className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded-lg px-3 py-2 text-sm text-[#1D2433] hover:bg-[#F8F9FB] transition"
             >
               Prioridad: {filterPriority === 'all' ? 'Todas' : filterPriority === 'ALTA' ? 'Alta' : filterPriority === 'MEDIA' ? 'Media' : 'Baja'}
               <ChevronDown size={14} className="text-[#A0AEC0]" />
@@ -169,7 +153,7 @@ export default function ActivitiesPage() {
                 <button
                   type="button"
                   onClick={() => { setFilterPriority('all'); setPriorityDropdownOpen(false); }}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB]:bg-[#374151] ${filterPriority === 'all' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterPriority === 'all' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                 >
                   Todas
                 </button>
@@ -178,7 +162,7 @@ export default function ActivitiesPage() {
                     key={p}
                     type="button"
                     onClick={() => { setFilterPriority(p); setPriorityDropdownOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB]:bg-[#374151] ${filterPriority === p ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterPriority === p ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                   >
                     {p === 'ALTA' ? 'Alta' : p === 'MEDIA' ? 'Media' : 'Baja'}
                   </button>
@@ -218,7 +202,7 @@ export default function ActivitiesPage() {
               <button
                 key={activity.id}
                 onClick={() => { if (!isObserver) {openEdit(activity); } }}
-                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[#F8F9FB]:bg-[#374151] transition"
+                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[#F8F9FB] transition"
               >
                 <div className="min-w-0">
                     <p className="text-sm font-medium text-[#1D2433] truncate">{activity.title}</p>

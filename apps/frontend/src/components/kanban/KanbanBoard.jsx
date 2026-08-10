@@ -3,9 +3,10 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Calendar, Link2, AlertTriangle, MessageSquare } from 'lucide-react';
 import { useUpdateActivityStatusMutation } from '../../hooks/useActivities';
 import { useToast } from '../common/useToast';
+import { getInitials, getAvatarColor } from '../../utils/avatarColors';
 
 const columns = [
-  { id: 'PENDIENTE', title: 'Pendiente', color: '#94A3B8', bgClass: 'bg-[#F1F5F9]' },
+  { id: 'PENDIENTE', title: 'Pendiente', color: '#F59E0B', bgClass: 'bg-[#FFFBEB]' },
   { id: 'EN_PROCESO', title: 'En proceso', color: '#3B82F6', bgClass: 'bg-[#EFF6FF]' },
   { id: 'EN_REVISION', title: 'En revisión', color: '#8B5CF6', bgClass: 'bg-[#F5F3FF]' },
   { id: 'COMPLETADA', title: 'Completada', color: '#22C55E', bgClass: 'bg-[#F0FDF4]' },
@@ -16,20 +17,6 @@ const priorityStyles = {
   MEDIA: { bg: '#FFFBEB', text: '#F59E0B', label: 'Media' },
   BAJA: { bg: '#F0FDF4', text: '#22C55E', label: 'Baja' },
 };
-
-const avatarColors = ['#4F46E5', '#0891B2', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777'];
-
-function getInitials(name) {
-  if (!name) return '?';
-  return name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
-}
-
-function getAvatarColor(name) {
-  if (!name) return avatarColors[0];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return avatarColors[Math.abs(hash) % avatarColors.length];
-}
 
 function isOverdue(dueDate, status) {
   if (!dueDate || status === 'COMPLETADA') return false;
@@ -52,15 +39,20 @@ function KanbanCard({ activity, onClick }) {
       tabIndex={0}
       onClick={() => onClick(activity)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(activity); }}
-      className="w-full bg-white rounded-xl p-4 shadow-sm border border-[#E4E7EC] text-left hover:shadow-md:shadow-lg:shadow-black/20 transition cursor-pointer"
+      className={`w-full bg-white rounded-xl p-4 shadow-sm text-left hover:shadow-md transition cursor-pointer ${overdue ? 'border-1 border-[#EF4444]' : 'border border-[#E4E7EC]'}`}
     >
-      <div className="flex items-center justify-between mb-2.5">
+      <div className="flex items-center gap-2 mb-2.5">
         <span
           className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
           style={{ backgroundColor: priority.bg, color: priority.text }}
         >
           {priority.label}
         </span>
+        {overdue && (
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#FEF2F2] text-[#EF4444] border border-[#FECACA]">
+            Vencida
+          </span>
+        )}
       </div>
 
       <h3 className="text-[13px] font-semibold text-[#1D2433] mb-3 line-clamp-2 leading-snug">{activity.title}</h3>
@@ -96,6 +88,8 @@ function KanbanCard({ activity, onClick }) {
           </span>
         )}
       </div>
+
+      {/* Subtareas ocultas temporalmente (sin HU asociada) */}
     </div>
   );
 }
@@ -149,8 +143,8 @@ export default function KanbanBoard({ activities: filteredActivities, isObserver
           <div key={column.id} className="flex flex-col">
             <div className="flex items-center gap-2 mb-3 px-1">
               <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: column.color }} />
-              <h3 className="text-xs font-bold text-[#1D2433] uppercase tracking-wide">{column.title}</h3>
-              <span className="text-[10px] font-bold text-[#64748B] bg-[#F1F5F9] px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+              <h3 className="text-sm font-semibold text-[#1D2433]">{column.title}</h3>
+              <span className="text-[11px] font-medium text-[#64748B] bg-[#F1F5F9] px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                 {columnActivities.length}
               </span>
             </div>
@@ -159,7 +153,7 @@ export default function KanbanBoard({ activities: filteredActivities, isObserver
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className={`flex-1 min-h-[200px] rounded-xl p-2 transition-colors ${column.bgClass} ${
+                  className={`flex-1 min-h-[200px] rounded-xl p-2 transition-colors bg-[#F8F9FB] ${
                     snapshot.isDraggingOver ? 'ring-2 ring-[#4F46E5]/30' : ''
                   }`}
                 >

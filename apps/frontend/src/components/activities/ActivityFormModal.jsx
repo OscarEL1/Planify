@@ -25,6 +25,7 @@ import {
 } from "../../hooks/useActivities";
 import { useToast } from "../common/useToast";
 import { useAuth } from "../../context/useAuth";
+import { getInitials, getAvatarColor } from "../../utils/avatarColors";
 
 const priorities = [
   { value: "ALTA", label: "Alta", dot: "#EF4444" },
@@ -33,39 +34,11 @@ const priorities = [
 ];
 
 const statusOptions = [
-  { value: "PENDIENTE", label: "Pendiente", dot: "#94A3B8" },
+  { value: "PENDIENTE", label: "Pendiente", dot: "#F59E0B" },
   { value: "EN_PROCESO", label: "En proceso", dot: "#3B82F6" },
   { value: "EN_REVISION", label: "En revisión", dot: "#8B5CF6" },
   { value: "COMPLETADA", label: "Completada", dot: "#22C55E" },
 ];
-
-const avatarColors = [
-  "#4F46E5",
-  "#0891B2",
-  "#059669",
-  "#D97706",
-  "#DC2626",
-  "#7C3AED",
-  "#DB2777",
-];
-
-function getInitials(name) {
-  if (!name) return "?";
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-function getAvatarColor(name) {
-  if (!name) return avatarColors[0];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++)
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return avatarColors[Math.abs(hash) % avatarColors.length];
-}
 
 function UserAvatar({ name, size = 24 }) {
   return (
@@ -635,6 +608,8 @@ export default function ActivityFormModal({
               {...register("description")}
             />
           </div>
+
+          {/* Subtareas — ocultas temporalmente (sin HU asociada) */}
 
           {/* Enlace de evidencia */}
           {!isObserver && (
