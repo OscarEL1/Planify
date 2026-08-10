@@ -194,8 +194,8 @@ export default function DashboardPage() {
               <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
                 Pendientes
               </p>
-              <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] flex items-center justify-center">
-                <Clock size={16} className="text-[#64748B]" />
+              <div className="w-8 h-8 rounded-lg bg-[#FFFBEB] flex items-center justify-center">
+                <Clock size={16} className="text-[#F59E0B]" />
               </div>
             </div>
             <p className="text-3xl font-bold text-[#1D2433]">{pending}</p>

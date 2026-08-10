@@ -83,16 +83,16 @@ export default function ActivitiesPage() {
   const closeModal = () => setModalMode(null);
 
   return (
-    <div className="flex min-h-screen w-full bg-[#F9FAFB] dark:bg-[#111827] transition-colors">
+    <div className="flex min-h-screen w-full bg-[#F9FAFB] transition-colors">
       <Navbar />
 
       <main className="flex-1 px-8 py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] dark:text-white mb-1">
+            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-1">
               Actividades
             </h1>
-            <p className="text-sm text-[#64748B] dark:text-[#9CA3AF]">
+            <p className="text-sm text-[#64748B]">
               Gestiona las actividades de tu equipo escolar.
             </p>
           </div>
@@ -110,7 +110,7 @@ export default function ActivitiesPage() {
 
         {/* Filtros */}
         <div className="flex items-center gap-4 mb-6">
-          <div className="flex items-center gap-2 text-sm text-[#64748B] dark:text-[#9CA3AF]">
+          <div className="flex items-center gap-2 text-sm text-[#64748B]">
             <Filter size={16} />
             Filtrar por:
           </div>
@@ -120,17 +120,17 @@ export default function ActivitiesPage() {
             <button
               type="button"
               onClick={() => { setAssigneeDropdownOpen(!assigneeDropdownOpen); setPriorityDropdownOpen(false); }}
-              className="flex items-center gap-2 bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-lg px-3 py-2 text-sm text-[#1D2433] dark:text-white hover:bg-[#F8F9FB] dark:hover:bg-[#374151] transition"
+              className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded-lg px-3 py-2 text-sm text-[#1D2433] hover:bg-[#F8F9FB] transition"
             >
               Responsable: {selectedAssigneeName}
               <ChevronDown size={14} className="text-[#A0AEC0]" />
             </button>
             {assigneeDropdownOpen && (
-              <div className="absolute z-50 mt-1 w-56 bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-lg shadow-lg py-1">
+              <div className="absolute z-50 mt-1 w-56 bg-white border border-[#E4E7EC] rounded-lg shadow-lg py-1">
                 <button
                   type="button"
                   onClick={() => { setFilterAssignee('all'); setAssigneeDropdownOpen(false); }}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] dark:hover:bg-[#374151] ${filterAssignee === 'all' ? 'bg-[#EEF2FF] dark:bg-[#312E81] text-[#4F46E5] dark:text-[#818CF8]' : 'text-[#1D2433] dark:text-white'}`}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterAssignee === 'all' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                 >
                   Todos
                 </button>
@@ -139,7 +139,7 @@ export default function ActivitiesPage() {
                     key={u.id}
                     type="button"
                     onClick={() => { setFilterAssignee(u.id); setAssigneeDropdownOpen(false); }}
-                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#F8F9FB] dark:hover:bg-[#374151] ${filterAssignee === u.id ? 'bg-[#EEF2FF] dark:bg-[#312E81] text-[#4F46E5] dark:text-[#818CF8]' : 'text-[#1D2433] dark:text-white'}`}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterAssignee === u.id ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                   >
                     <div
                       className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
@@ -159,17 +159,17 @@ export default function ActivitiesPage() {
             <button
               type="button"
               onClick={() => { setPriorityDropdownOpen(!priorityDropdownOpen); setAssigneeDropdownOpen(false); }}
-              className="flex items-center gap-2 bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-lg px-3 py-2 text-sm text-[#1D2433] dark:text-white hover:bg-[#F8F9FB] dark:hover:bg-[#374151] transition"
+              className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded-lg px-3 py-2 text-sm text-[#1D2433] hover:bg-[#F8F9FB] transition"
             >
               Prioridad: {filterPriority === 'all' ? 'Todas' : filterPriority === 'ALTA' ? 'Alta' : filterPriority === 'MEDIA' ? 'Media' : 'Baja'}
               <ChevronDown size={14} className="text-[#A0AEC0]" />
             </button>
             {priorityDropdownOpen && (
-              <div className="absolute z-50 mt-1 w-40 bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-lg shadow-lg py-1">
+              <div className="absolute z-50 mt-1 w-40 bg-white border border-[#E4E7EC] rounded-lg shadow-lg py-1">
                 <button
                   type="button"
                   onClick={() => { setFilterPriority('all'); setPriorityDropdownOpen(false); }}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] dark:hover:bg-[#374151] ${filterPriority === 'all' ? 'bg-[#EEF2FF] dark:bg-[#312E81] text-[#4F46E5] dark:text-[#818CF8]' : 'text-[#1D2433] dark:text-white'}`}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterPriority === 'all' ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                 >
                   Todas
                 </button>
@@ -178,7 +178,7 @@ export default function ActivitiesPage() {
                     key={p}
                     type="button"
                     onClick={() => { setFilterPriority(p); setPriorityDropdownOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] dark:hover:bg-[#374151] ${filterPriority === p ? 'bg-[#EEF2FF] dark:bg-[#312E81] text-[#4F46E5] dark:text-[#818CF8]' : 'text-[#1D2433] dark:text-white'}`}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] ${filterPriority === p ? 'bg-[#EEF2FF] text-[#4F46E5]' : 'text-[#1D2433]'}`}
                   >
                     {p === 'ALTA' ? 'Alta' : p === 'MEDIA' ? 'Media' : 'Baja'}
                   </button>
@@ -189,7 +189,7 @@ export default function ActivitiesPage() {
         </div>
 
         {isLoading && (
-          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-8 text-center text-sm text-[#64748B] dark:text-[#9CA3AF]">
+          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-8 text-center text-sm text-[#64748B]">
             Cargando actividades...
           </div>
         )}
@@ -201,28 +201,28 @@ export default function ActivitiesPage() {
         )}
 
         {!isLoading && !isError && activities?.length === 0 && (
-          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-8 text-center text-sm text-[#64748B] dark:text-[#9CA3AF]">
+          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-8 text-center text-sm text-[#64748B]">
             Aún no hay actividades. Crea la primera con el botón de arriba.
           </div>
         )}
 
         {!isLoading && !isError && activities?.length > 0 && filteredActivities.length === 0 && (
-          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl p-8 text-center text-sm text-[#64748B] dark:text-[#9CA3AF]">
+          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-8 text-center text-sm text-[#64748B]">
             No hay actividades que coincidan con los filtros seleccionados.
           </div>
         )}
 
         {!isLoading && !isError && filteredActivities.length > 0 && (
-          <div className="bg-white dark:bg-[#1F2937] border border-[#E4E7EC] dark:border-[#374151] rounded-2xl divide-y divide-[#E4E7EC] dark:divide-[#374151]">
+          <div className="bg-white border border-[#E4E7EC] rounded-2xl divide-y divide-[#E4E7EC]">
             {filteredActivities.map((activity) => (
               <button
                 key={activity.id}
                 onClick={() => { if (!isObserver) {openEdit(activity); } }}
-                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[#F8F9FB] dark:hover:bg-[#374151] transition"
+                className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[#F8F9FB] transition"
               >
                 <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#1D2433] dark:text-white truncate">{activity.title}</p>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-[#64748B] dark:text-[#9CA3AF]">
+                    <p className="text-sm font-medium text-[#1D2433] truncate">{activity.title}</p>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-[#64748B]">
                     {activity.assignee && (
                       <span className="flex items-center gap-1">
                         <CircleUserRound size={12} />
