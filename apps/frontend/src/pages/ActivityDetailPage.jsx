@@ -173,7 +173,7 @@ export default function ActivityDetailPage() {
 
       <main className="flex-1 px-8 py-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E4E7EC]">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -242,10 +242,11 @@ export default function ActivityDetailPage() {
           {activity.title}
         </h1>
         {activity.description && (
-          <p className="text-sm text-[#64748B] mb-8">
+          <p className="text-sm text-[#64748B] mb-6">
             {activity.description}
           </p>
         )}
+        {!activity.description && <div className="mb-6" />}
 
         {/* Contenido principal */}
         <div className="flex gap-0 items-start">
