@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { TrendingUp, CheckCircle2, Clock, BarChart3 } from "lucide-react";
+import { TrendingUp, CheckCircle2, Clock, BarChart3, Eye } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
 import {
   useActivitiesQuery,
   useUsersQuery,
   useActivityStatsQuery,
 } from "../hooks/useActivities";
+import { getInitials, getAvatarColor } from "../utils/avatarColors";
 
 const statusColors = {
-  PENDIENTE: "#94A3B8",
+  PENDIENTE: "#F59E0B",
   EN_PROCESO: "#3B82F6",
   EN_REVISION: "#8B5CF6",
   COMPLETADA: "#22C55E",
@@ -26,34 +27,6 @@ const priorityStyles = {
   MEDIA: { bg: "#FFFBEB", color: "#F59E0B", label: "Media" },
   BAJA: { bg: "#F0FDF4", color: "#22C55E", label: "Baja" },
 };
-
-const avatarColors = [
-  "#4F46E5",
-  "#0891B2",
-  "#059669",
-  "#D97706",
-  "#DC2626",
-  "#7C3AED",
-  "#DB2777",
-];
-
-function getInitials(name) {
-  if (!name) return "?";
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-function getAvatarColor(name) {
-  if (!name) return avatarColors[0];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++)
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return avatarColors[Math.abs(hash) % avatarColors.length];
-}
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString("es-MX", {
@@ -165,17 +138,17 @@ export default function DashboardPage() {
 
   return (
     <div
-      className="flex min-h-screen w-full bg-[#F9FAFB]"
+      className="flex min-h-screen w-full bg-[#F9FAFB] transition-colors"
     >
       <Navbar />
 
       <main className="flex-1 px-8 py-10">
-        <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-8">
+        <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] pb-4 mb-6 border-b border-[#E4E7EC]">
           Progreso del equipo
         </h1>
 
-        {/* 4 tarjetas principales */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        {/* 6 tarjetas principales */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
@@ -192,16 +165,14 @@ export default function DashboardPage() {
           <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
-                Completadas
+                Pendientes
               </p>
-              <div className="w-8 h-8 rounded-lg bg-[#DCFCE7] flex items-center justify-center">
-                <CheckCircle2 size={16} className="text-[#22C55E]" />
+              <div className="w-8 h-8 rounded-lg bg-[#FFFBEB] flex items-center justify-center">
+                <Clock size={16} className="text-[#F59E0B]" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-[#1D2433]">{completed}</p>
-            <p className="text-xs text-[#64748B] mt-1">
-              de {total} actividades
-            </p>
+            <p className="text-3xl font-bold text-[#1D2433]">{pending}</p>
+            <p className="text-xs text-[#64748B] mt-1">aún sin iniciar</p>
           </div>
 
           <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
@@ -215,6 +186,34 @@ export default function DashboardPage() {
             </div>
             <p className="text-3xl font-bold text-[#1D2433]">{inProgress}</p>
             <p className="text-xs text-[#64748B] mt-1">actualmente en curso</p>
+          </div>
+
+          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
+                En revisión
+              </p>
+              <div className="w-8 h-8 rounded-lg bg-[#F3E8FF] flex items-center justify-center">
+                <Eye size={16} className="text-[#8B5CF6]" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-[#1D2433]">{inReview}</p>
+            <p className="text-xs text-[#64748B] mt-1">pendientes de validar</p>
+          </div>
+
+          <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">
+                Completadas
+              </p>
+              <div className="w-8 h-8 rounded-lg bg-[#DCFCE7] flex items-center justify-center">
+                <CheckCircle2 size={16} className="text-[#22C55E]" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-[#1D2433]">{completed}</p>
+            <p className="text-xs text-[#64748B] mt-1">
+              de {total} actividades
+            </p>
           </div>
 
           <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
@@ -359,7 +358,7 @@ export default function DashboardPage() {
                     key={activity.id}
                     type="button"
                     onClick={() => navigate(`/activities/${activity.id}`)}
-                    className="w-full flex items-center justify-between py-3 text-left hover:bg-[#F8F9FB]:bg-[#374151] transition"
+                    className="w-full flex items-center justify-between py-3 text-left hover:bg-[#F8F9FB] transition"
                   >
                     <div className="flex items-center gap-3">
                       {activity.assignee && (

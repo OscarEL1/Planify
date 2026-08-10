@@ -4,8 +4,10 @@ import {
   LayoutDashboard,
   LayoutPanelLeft,
   ListChecks,
+  Settings,
   LogOut,
   MoreVertical,
+  User,
 } from 'lucide-react';
 import { logout } from '../../services/authService';
 import { useAuth } from '../../context/useAuth';
@@ -20,23 +22,36 @@ function getInitials(name) {
     .join('');
 }
 
-const ROLE_LABELS = {
-  MIEMBRO_EQUIPO: 'Miembro del equipo',
-  OBSERVADOR: 'Observador',
-};
-
-const NAV_LINKS = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/kanban', label: 'Kanban', icon: LayoutPanelLeft },
-  { to: '/activities', label: 'Actividades', icon: ListChecks },
-];
-
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
+
+  const ROLE_LABELS = {
+    ADMIN: 'Administrador',
+    MIEMBRO_EQUIPO: 'Miembro del equipo',
+    OBSERVADOR: 'Observador',
+  };
+
+  const NAV_SECTIONS = [
+    {
+      title: 'PRINCIPAL',
+      links: [
+        { to: '/dashboard', label: 'Panel de inicio', icon: LayoutDashboard },
+        { to: '/kanban', label: 'Tablero Kanban', icon: LayoutPanelLeft },
+        { to: '/activities', label: 'Actividades', icon: ListChecks },
+      ],
+    },
+    {
+      title: 'ESPACIO DE TRABAJO',
+      links: [
+        { to: '/team', label: 'Equipo', icon: User },
+        { to: '/settings', label: 'Configuración', icon: Settings },
+      ],
+    },
+  ];
 
   const handleLogout = async () => {
     await logout();
@@ -57,38 +72,47 @@ export default function Navbar() {
   }, [isMenuOpen]);
 
   return (
-    <aside className="relative w-[220px] h-screen sticky top-0 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col">
+    <aside className="relative w-[220px] h-screen sticky top-0 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col transition-colors">
       <div className="flex items-center gap-2.5 px-5 h-16 border-b border-gray-100">
-        <div className="w-8 h-8 rounded-lg bg-[#5B50D6] flex items-center justify-center flex-shrink-0">
-          <LayoutPanelLeft size={16} className="text-white" />
+        <div className="w-9 h-9 rounded-xl bg-[#5B50D6] flex items-center justify-center flex-shrink-0">
+          <LayoutPanelLeft size={18} className="text-white" />
         </div>
         <div>
-          <p className="font-['Plus_Jakarta_Sans'] text-sm font-bold text-[#1D2433] leading-tight">
+          <p className="font-['Plus_Jakarta_Sans'] text-lg font-bold text-[#1D2433] leading-tight">
             Planify
           </p>
           <p className="text-[10px] text-[#64748B] leading-tight">Gestor de Actividades</p>
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
-        {NAV_LINKS.map((link) => {
-          const isActive = location.pathname === link.to;
-          const Icon = link.icon;
-          return (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition ${
-                isActive
-                  ? 'bg-[#F0EEF8] text-[#5B50D6]'
-                  : 'text-[#64748B] hover:bg-[#F8F9FB] hover:text-[#1D2433]'
-              }`}
-            >
-              <Icon size={16} />
-              {link.label}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-5">
+        {NAV_SECTIONS.map((section) => (
+          <div key={section.title}>
+            <p className="px-3 mb-2.5 text-[10px] font-semibold uppercase tracking-wide text-[#A0AEC0]">
+              {section.title}
+            </p>
+            <div className="flex flex-col gap-0.5">
+              {section.links.map((link) => {
+                const isActive = location.pathname === link.to;
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition ${
+                      isActive
+                        ? 'bg-[#F0EEF8] text-[#5B50D6]'
+                        : 'text-[#64748B] hover:bg-[#F8F9FB] hover:text-[#1D2433]'
+                    }`}
+                  >
+                    <Icon size={16} />
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div ref={menuRef} className="relative border-t border-gray-100 p-3">
@@ -98,6 +122,22 @@ export default function Navbar() {
               <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
               <p className="text-xs text-gray-500 truncate">{user?.email}</p>
             </div>
+            <button
+              type="button"
+              onClick={() => { setIsMenuOpen(false); navigate('/profile'); }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <User size={16} />
+              Perfil
+            </button>
+            <button
+              type="button"
+              onClick={() => { setIsMenuOpen(false); navigate('/settings'); }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <Settings size={16} />
+              Configuración
+            </button>
             <div className="border-t border-gray-100 mt-1">
               <button
                 type="button"
