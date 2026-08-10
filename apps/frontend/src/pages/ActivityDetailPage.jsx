@@ -217,11 +217,65 @@ export default function ActivityDetailPage() {
           </div>
         </div>
 
+        {/* ID, categoría y estado */}
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs font-semibold text-[#4F46E5] bg-[#EEF2FF] px-2 py-0.5 rounded">
+            ACT-{activity.id?.slice(0, 4).toUpperCase()}
+          </span>
+          <span className="text-xs text-[#64748B]">·</span>
+          <span className="text-xs text-[#64748B]">Actividad Escolar</span>
+          <span className="text-xs text-[#64748B]">·</span>
+          <span
+            className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: status.bg, color: status.color }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ backgroundColor: status.dot }}
+            />
+            {status.label}
+          </span>
+        </div>
+
+        {/* Título y descripción */}
+        <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-2">
+          {activity.title}
+        </h1>
+        {activity.description && (
+          <p className="text-sm text-[#64748B] mb-8">
+            {activity.description}
+          </p>
+        )}
+
         {/* Contenido principal */}
         <div className="flex gap-6 items-start">
-          {/* Comments */}
+          {/* Columna izquierda */}
           <div className="flex-1 min-w-0">
+            {/* Evidencia */}
             <div className="mb-8">
+              <h2 className="text-sm font-semibold text-[#1D2433] mb-3">
+                Evidencia
+              </h2>
+              {activity.evidenceUrl ? (
+                <a
+                  href={activity.evidenceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-[#4F46E5] hover:underline"
+                >
+                  <Link2 size={14} />
+                  {activity.evidenceUrl}
+                </a>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-[#A0AEC0] bg-[#F8F9FB] rounded-lg px-4 py-3">
+                  <Link2 size={14} />
+                  Aún no se ha registrado evidencia de entrega
+                </div>
+              )}
+            </div>
+
+            {/* Comentarios */}
+            <div>
               <div className="flex items-center gap-2 mb-4">
                 <MessageSquare size={16} className="text-[#1D2433]" />
                 <h2 className="text-sm font-semibold text-[#1D2433]">
@@ -383,7 +437,7 @@ export default function ActivityDetailPage() {
             </div>
 
             {/* Subtareas */}
-            <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5 mb-4">
+            <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <CheckSquare size={16} className="text-[#1D2433]" />
                 <h3 className="text-sm font-semibold text-[#1D2433]">
@@ -418,26 +472,6 @@ export default function ActivityDetailPage() {
                 ))}
               </div>
             </div>
-
-            {/* Evidencia */}
-            {activity.evidenceUrl && (
-              <div className="bg-white border border-[#E4E7EC] rounded-2xl p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Link2 size={16} className="text-[#1D2433]" />
-                  <h3 className="text-sm font-semibold text-[#1D2433]">
-                    Evidencia
-                  </h3>
-                </div>
-                <a
-                  href={activity.evidenceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-[#4F46E5] hover:underline break-all"
-                >
-                  {activity.evidenceUrl}
-                </a>
-              </div>
-            )}
           </div>
         </div>
       </main>
