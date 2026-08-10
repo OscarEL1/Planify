@@ -74,14 +74,11 @@ export default function ActivitiesPage() {
       <Navbar />
 
       <main className="flex-1 px-8 py-10">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E4E7EC]">
           <div>
-            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-1">
+            <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433]">
               Actividades
             </h1>
-            <p className="text-sm text-[#64748B]">
-              Gestiona las actividades de tu equipo escolar.
-            </p>
           </div>
           {!isObserver && (
         <button
@@ -96,7 +93,7 @@ export default function ActivitiesPage() {
         </div>
 
         {/* Filtros */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 pb-4 mb-4 border-b border-[#E4E7EC]">
           <div className="flex items-center gap-2 text-sm text-[#64748B]">
             <Filter size={16} />
             Filtrar por:

@@ -143,7 +143,7 @@ export default function DashboardPage() {
       <Navbar />
 
       <main className="flex-1 px-8 py-10">
-        <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] mb-8">
+        <h1 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold text-[#1D2433] pb-4 mb-6 border-b border-[#E4E7EC]">
           Progreso del equipo
         </h1>
 
