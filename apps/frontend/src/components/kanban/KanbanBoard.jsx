@@ -42,7 +42,7 @@ function KanbanCard({ activity, onClick }) {
       tabIndex={0}
       onClick={() => onClick(activity)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(activity); }}
-      className={`w-full bg-white rounded-xl p-4 shadow-sm text-left hover:shadow-md transition cursor-pointer ${overdue ? 'border-2 border-[#EF4444]' : 'border border-[#E4E7EC]'}`}
+      className={`w-full bg-white rounded-xl p-4 shadow-sm text-left hover:shadow-md transition cursor-pointer ${overdue ? 'border-1 border-[#EF4444]' : 'border border-[#E4E7EC]'}`}
     >
       <div className="flex items-center gap-2 mb-2.5">
         <span
