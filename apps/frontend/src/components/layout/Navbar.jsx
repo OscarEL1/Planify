@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   LayoutPanelLeft,
   ListChecks,
-  Settings,
   LogOut,
   MoreVertical,
   User,
@@ -42,13 +41,6 @@ export default function Navbar() {
         { to: '/dashboard', label: 'Panel de inicio', icon: LayoutDashboard },
         { to: '/kanban', label: 'Tablero Kanban', icon: LayoutPanelLeft },
         { to: '/activities', label: 'Actividades', icon: ListChecks },
-      ],
-    },
-    {
-      title: 'ESPACIO DE TRABAJO',
-      links: [
-        { to: '/team', label: 'Equipo', icon: User },
-        { to: '/settings', label: 'Configuración', icon: Settings },
       ],
     },
   ];
@@ -129,14 +121,6 @@ export default function Navbar() {
             >
               <User size={16} />
               Perfil
-            </button>
-            <button
-              type="button"
-              onClick={() => { setIsMenuOpen(false); navigate('/settings'); }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-            >
-              <Settings size={16} />
-              Configuración
             </button>
             <div className="border-t border-gray-100 mt-1">
               <button
